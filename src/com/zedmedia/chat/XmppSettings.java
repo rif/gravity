@@ -8,6 +8,7 @@ import org.jivesoftware.smack.packet.Presence;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -33,8 +34,7 @@ public class XmppSettings extends Dialog implements
 		Button ok = (Button) findViewById(R.id.ok);
 		ok.setOnClickListener(this);
 		sharedPref = chatClient.getPreferences(Context.MODE_PRIVATE);
-		setText(R.id.host, sharedPref.getString("" + R.id.host,
-				HOST));
+		setText(R.id.host, sharedPref.getString("" + R.id.host, HOST));
 		setText(R.id.port, sharedPref.getString("" + R.id.port, PORT));
 		setText(R.id.service, sharedPref.getString("" + R.id.service, ""));
 		setText(R.id.userid, sharedPref.getString("" + R.id.userid, ""));
@@ -56,33 +56,8 @@ public class XmppSettings extends Dialog implements
 		editor.putString("" + R.id.userid, username);
 		editor.putString("" + R.id.password, password);
 		editor.commit();
-		createConnection(host, port, service, username, password);
+		new CreateConnection().execute(host, port, service, username, password);
 		dismiss();
-	}
-
-	protected void createConnection(String host, String port, String service,
-			String username, String password) {
-		// Create connection
-
-		ConnectionConfiguration connectionConfig = new ConnectionConfiguration(
-				host, Integer.parseInt(port), service);
-		XMPPConnection connection = new XMPPConnection(connectionConfig);
-
-		try {
-			connection.connect();
-		} catch (XMPPException ex) {
-			chatClient.setConnection(null);
-		}
-		try {
-			connection.login(username, password);
-
-			// Set status to online / available
-			Presence presence = new Presence(Presence.Type.available);
-			connection.sendPacket(presence);
-			chatClient.setConnection(connection);
-		} catch (XMPPException ex) {
-			chatClient.setConnection(null);
-		}
 	}
 
 	private String getText(int id) {
@@ -93,5 +68,36 @@ public class XmppSettings extends Dialog implements
 	private void setText(int id, String text) {
 		EditText widget = (EditText) this.findViewById(id);
 		widget.setText(text);
+	}
+
+	class CreateConnection extends AsyncTask<String, Void, Void> {
+		@Override
+		protected Void doInBackground(String... strings) {
+			String host = strings[0];
+			String port = strings[1];
+			String service = strings[2];
+			String username = strings[3];
+			String password = strings[4];
+			ConnectionConfiguration connectionConfig = new ConnectionConfiguration(
+					host, Integer.parseInt(port), service);
+			XMPPConnection connection = new XMPPConnection(connectionConfig);
+
+			try {
+				connection.connect();
+			} catch (XMPPException ex) {
+				chatClient.setConnection(null);
+			}
+			try {
+				connection.login(username, password);
+
+				// Set status to online / available
+				Presence presence = new Presence(Presence.Type.available);
+				connection.sendPacket(presence);
+				chatClient.setConnection(connection);
+			} catch (XMPPException ex) {
+				chatClient.setConnection(null);
+			}
+			return null;
+		}
 	}
 }

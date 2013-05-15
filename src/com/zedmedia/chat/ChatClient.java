@@ -15,7 +15,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -38,6 +37,12 @@ public class ChatClient extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_chat_client);
 
+		/*
+		 * StrictMode.ThreadPolicy policy = new
+		 * StrictMode.ThreadPolicy.Builder() .permitAll().build();
+		 * StrictMode.setThreadPolicy(policy);
+		 */
+
 		recipient = (EditText) this.findViewById(R.id.recipient);
 		text = (EditText) this.findViewById(R.id.message);
 		list = (ListView) this.findViewById(R.id.messageList);
@@ -53,10 +58,10 @@ public class ChatClient extends Activity {
 		String service = sharedPref.getString("" + R.id.service, "");
 		String username = sharedPref.getString("" + R.id.userid, "");
 		String password = sharedPref.getString("" + R.id.password, "");
-		Log.w("Chat", "host: "+host+", port: "+port+", user: "+username+", pass: "+password);
 		if (!host.equals("") && !port.equals("") && !username.equals("")
 				&& !password.equals("")) {
-			settings.createConnection(host, port, service, username, password);
+			settings.new CreateConnection().execute(host, port, service,
+					username, password);
 		}
 	}
 
@@ -127,5 +132,4 @@ public class ChatClient extends Activity {
 		}
 
 	}
-
 }
