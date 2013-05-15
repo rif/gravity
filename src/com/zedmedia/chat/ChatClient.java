@@ -11,8 +11,11 @@ import org.jivesoftware.smack.packet.Packet;
 import org.jivesoftware.smack.util.StringUtils;
 
 import android.app.Activity;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -41,12 +44,27 @@ public class ChatClient extends Activity {
 		setListAdapter();
 
 		settings = new XmppSettings(this);
+
+		// try to establish connection
+		SharedPreferences sharedPref = this
+				.getPreferences(Context.MODE_PRIVATE);
+		String host = sharedPref.getString("" + R.id.host, "");
+		String port = sharedPref.getString("" + R.id.port, "");
+		String service = sharedPref.getString("" + R.id.service, "");
+		String username = sharedPref.getString("" + R.id.userid, "");
+		String password = sharedPref.getString("" + R.id.password, "");
+		Log.w("Chat", "host: "+host+", port: "+port+", user: "+username+", pass: "+password);
+		if (!host.equals("") && !port.equals("") && !username.equals("")
+				&& !password.equals("")) {
+			settings.createConnection(host, port, service, username, password);
+		}
 	}
 
 	/** Called when the user clicks the Send button */
 	public void sendMessage(View view) {
-		String to = recipient.getText().toString() + "@ded697.ded.reflected.net";
-		String message = text.getText().toString();		
+		String to = recipient.getText().toString()
+				+ "@ded697.ded.reflected.net";
+		String message = text.getText().toString();
 		text.setText("");
 
 		Message msg = new Message(to, Message.Type.chat);
@@ -58,7 +76,6 @@ public class ChatClient extends Activity {
 	}
 
 	// Called by settings when connection is established
-
 	public void setConnection(XMPPConnection connection) {
 		this.connection = connection;
 		if (connection != null) {
@@ -95,20 +112,20 @@ public class ChatClient extends Activity {
 		getMenuInflater().inflate(R.menu.chat_client, menu);
 		return true;
 	}
-	
+
 	@Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch(item.getItemId()) {
-        case R.id.settings:
-            settings.show();
-            return true;
-        case R.id.quit:
-            finish();
-            return true;
-        default:
-            return super.onOptionsItemSelected(item);
-        }
-    
-    }
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+		case R.id.settings:
+			settings.show();
+			return true;
+		case R.id.quit:
+			finish();
+			return true;
+		default:
+			return super.onOptionsItemSelected(item);
+		}
+
+	}
 
 }
