@@ -6,13 +6,13 @@
     android:orientation="vertical" >
 
   <LinearLayout  
-    android:orientation="horizontal" 
-    android:layout_weight="0" 
+    android:orientation="horizontal"     
     android:layout_width="match_parent" 
     android:layout_height="wrap_content"> 
     <EditText
-            android:id="@+id/recipient"            
-            android:layout_width="wrap_content"
+            android:id="@+id/recipient" 
+            android:layout_weight="1"           
+            android:layout_width="0dip"
             android:layout_height="wrap_content"            
             android:hint="@string/recipient" />
   </LinearLayout> 
@@ -23,11 +23,14 @@
       android:orientation="vertical" 
       android:layout_weight="1" 
       android:layout_width="fill_parent" 
-      android:layout_height="fill_parent"> 
+      android:layout_height="0dip"> 
+
       <ListView
-        android:id="@+id/messageList"
-        android:layout_width="match_parent"
-        android:layout_height="419dp" >
+          android:id="@+id/messageList"
+          android:layout_width="match_parent"
+          android:layout_height="fill_parent"
+          android:scrollbarAlwaysDrawVerticalTrack="true" >
+
         </ListView>
     </LinearLayout>  
 
