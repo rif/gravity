@@ -1,5 +1,6 @@
 package com.zedmedia.chat;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 import org.jivesoftware.smack.PacketListener;
@@ -10,6 +11,7 @@ import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smack.packet.Packet;
 import org.jivesoftware.smack.util.StringUtils;
 
+import android.R;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -37,11 +39,9 @@ public class ChatClient extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_chat_client);
 
-		/*
-		 * StrictMode.ThreadPolicy policy = new
-		 * StrictMode.ThreadPolicy.Builder() .permitAll().build();
-		 * StrictMode.setThreadPolicy(policy);
-		 */
+		// StrictMode.ThreadPolicy policy = new
+		// StrictMode.ThreadPolicy.Builder() .permitAll().build();
+		// StrictMode.setThreadPolicy(policy);
 
 		recipient = (EditText) this.findViewById(R.id.recipient);
 		text = (EditText) this.findViewById(R.id.message);
@@ -63,6 +63,15 @@ public class ChatClient extends Activity {
 			settings.new CreateConnection().execute(host, port, service,
 					username, password);
 		}
+		try {
+			WebService.getInstance().login();
+			messages.add("Credit: " + WebService.getInstance().getCredit());
+			text.setText("mama");
+			setListAdapter();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
 	}
 
 	/** Called when the user clicks the Send button */
@@ -70,7 +79,7 @@ public class ChatClient extends Activity {
 		String to = recipient.getText().toString()
 				+ "@ded697.ded.reflected.net";
 		String message = text.getText().toString();
-		text.setText("");
+		text.setText("");		
 
 		Message msg = new Message(to, Message.Type.chat);
 		msg.setBody(message);
