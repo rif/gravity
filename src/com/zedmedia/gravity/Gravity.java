@@ -14,6 +14,7 @@ import org.jivesoftware.smack.util.StringUtils;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.Menu;
@@ -62,16 +63,26 @@ public class Gravity extends Activity {
 			settings.new CreateConnection().execute(host, port, service,
 					username, password);
 		}
+		new AsyncTask<Void, Void, Void>() {
+			private String credit = "";
+			@Override
+			protected Void doInBackground(Void... params) {				
+				try {
+					WebService.getInstance().login();
+					credit = WebService.getInstance().getCredit();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				runOnUiThread(new Runnable() {
+					public void run() {
+						messages.add("Credit: " + credit);
+						setListAdapter();
+					}
+				});
 
-		try {
-			WebService.getInstance().login();
-			messages.add("Credit: " + WebService.getInstance().getCredit());
-			text.setText("mama");
-			setListAdapter();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
+				return null;
+			}
+		}.execute();
 	}
 
 	/** Called when the user clicks the Send button */
