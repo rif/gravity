@@ -1,4 +1,4 @@
-package com.zedmedia.chat;
+package com.zedmedia.gravity;
 
 import java.io.IOException;
 import java.security.MessageDigest;

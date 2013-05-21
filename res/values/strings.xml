@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Chat</string>
+    <string name="app_name">Gravity</string>    
     <string name="edit_message">Enter a message</string>
     <string name="recipient">Recipient id</string>
     <string name="button_send">Send</string>

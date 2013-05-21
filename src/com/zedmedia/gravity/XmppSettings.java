@@ -1,4 +1,4 @@
-package com.zedmedia.chat;
+package com.zedmedia.gravity;
 
 import org.jivesoftware.smack.ConnectionConfiguration;
 import org.jivesoftware.smack.XMPPConnection;
@@ -19,12 +19,12 @@ public class XmppSettings extends Dialog implements
 		android.view.View.OnClickListener {
 	private static final String HOST = "ded697.ded.reflected.net";
 	private static final String PORT = "5222";
-	private ChatClient chatClient;
+	private Gravity gravity;
 	private SharedPreferences sharedPref;
 
-	public XmppSettings(ChatClient chatClient) {
+	public XmppSettings(Gravity chatClient) {
 		super(chatClient);
-		this.chatClient = chatClient;
+		this.gravity = chatClient;
 	}
 
 	protected void onStart() {
@@ -33,7 +33,7 @@ public class XmppSettings extends Dialog implements
 		setTitle("Connection Settings");
 		Button ok = (Button) findViewById(R.id.ok);
 		ok.setOnClickListener(this);
-		sharedPref = chatClient.getPreferences(Context.MODE_PRIVATE);
+		sharedPref = gravity.getPreferences(Context.MODE_PRIVATE);
 		setText(R.id.host, sharedPref.getString("" + R.id.host, HOST));
 		setText(R.id.port, sharedPref.getString("" + R.id.port, PORT));
 		setText(R.id.service, sharedPref.getString("" + R.id.service, ""));
@@ -85,7 +85,7 @@ public class XmppSettings extends Dialog implements
 			try {
 				connection.connect();
 			} catch (XMPPException ex) {
-				chatClient.setConnection(null);
+				gravity.setConnection(null);
 			}
 			try {
 				connection.login(username, password);
@@ -93,9 +93,9 @@ public class XmppSettings extends Dialog implements
 				// Set status to online / available
 				Presence presence = new Presence(Presence.Type.available);
 				connection.sendPacket(presence);
-				chatClient.setConnection(connection);
+				gravity.setConnection(connection);
 			} catch (XMPPException ex) {
-				chatClient.setConnection(null);
+				gravity.setConnection(null);
 			}
 			return null;
 		}

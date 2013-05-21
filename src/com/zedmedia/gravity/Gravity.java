@@ -1,4 +1,4 @@
-package com.zedmedia.chat;
+package com.zedmedia.gravity;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -11,7 +11,6 @@ import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smack.packet.Packet;
 import org.jivesoftware.smack.util.StringUtils;
 
-import android.R;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -24,7 +23,7 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
 
-public class ChatClient extends Activity {
+public class Gravity extends Activity {
 	private ArrayList<String> messages = new ArrayList<String>();
 	private Handler handler = new Handler();
 	private EditText recipient;
@@ -37,7 +36,7 @@ public class ChatClient extends Activity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_chat_client);
+		setContentView(R.layout.activity_gravity);
 
 		// StrictMode.ThreadPolicy policy = new
 		// StrictMode.ThreadPolicy.Builder() .permitAll().build();
@@ -63,6 +62,7 @@ public class ChatClient extends Activity {
 			settings.new CreateConnection().execute(host, port, service,
 					username, password);
 		}
+
 		try {
 			WebService.getInstance().login();
 			messages.add("Credit: " + WebService.getInstance().getCredit());
@@ -79,7 +79,7 @@ public class ChatClient extends Activity {
 		String to = recipient.getText().toString()
 				+ "@ded697.ded.reflected.net";
 		String message = text.getText().toString();
-		text.setText("");		
+		text.setText("");
 
 		Message msg = new Message(to, Message.Type.chat);
 		msg.setBody(message);
@@ -123,7 +123,7 @@ public class ChatClient extends Activity {
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
-		getMenuInflater().inflate(R.menu.chat_client, menu);
+		getMenuInflater().inflate(R.menu.gravity, menu);
 		return true;
 	}
 
