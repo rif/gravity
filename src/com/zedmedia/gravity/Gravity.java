@@ -1,8 +1,12 @@
 package com.zedmedia.gravity;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
+import org.jivesoftware.smack.AccountManager;
 import org.jivesoftware.smack.ConnectionConfiguration;
 import org.jivesoftware.smack.PacketListener;
 import org.jivesoftware.smack.XMPPConnection;
@@ -19,6 +23,7 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -31,12 +36,12 @@ import com.facebook.Response;
 import com.facebook.Session;
 import com.facebook.SessionState;
 import com.facebook.model.GraphUser;
-import com.facebook.widget.LoginButton;
 
 public class Gravity extends Activity {
 	private static final String HOST = "ded697.ded.reflected.net";
 	private static final int PORT = 5222;
 	private static final String SERVICE = "";
+	private static final String TAG = "GRAVITY";
 	private ArrayList<String> messages = new ArrayList<String>();
 	private Handler handler = new Handler();
 	private EditText recipient;
@@ -59,51 +64,30 @@ public class Gravity extends Activity {
 		list = (ListView) this.findViewById(R.id.messageList);
 		setListAdapter();
 		// try to establish connection
-		//SharedPreferences sharedPref = this
-		//		.getPreferences(Context.MODE_PRIVATE);
-		//String username = sharedPref.getString("" + R.id.userid, "");
-		//String password = sharedPref.getString("" + R.id.password, "");
-		//if (!username.equals("") && !password.equals("")) {
-		//	new CreateConnection().execute(username, password);
-		//}
-		// new AsyncTask<Void, Void, Void>() {
-		// private String credit = "";
-		// @Override
-		// protected Void doInBackground(Void... params) {
-		// try {
-		// WebService.getInstance().login();
-		// credit = WebService.getInstance().getCredit();
-		// messages.add("Credit: " + credit);
-		// } catch (IOException e) {
-		// e.printStackTrace();
+		// SharedPreferences sharedPref = this
+		// .getPreferences(Context.MODE_PRIVATE);
+		// String username = sharedPref.getString("" + R.id.userid, "");
+		// String password = sharedPref.getString("" + R.id.password, "");
+		// if (!username.equals("") && !password.equals("")) {
+		// new CreateConnection().execute(username, password);
 		// }
-		// runOnUiThread(new Runnable() {
-		// public void run() {
-		// setListAdapter();
-		// }
-		// });
-		//
-		// return null;
-		// }
-		// }.execute();
-		// Intent intent = new Intent(this, AccountManagerActivity.class);
-		// startActivity(intent);
-		LoginButton authButton = (LoginButton) findViewById(R.id.authButton);		
-		authButton.setReadPermissions(Arrays.asList("email"));
-		//fbLogin();
-
+		fbLogin();
 	}
 
 	public void fbLogin() {
 		// start Facebook Login
+		final Activity activity = this;
 		Session.openActiveSession(this, true, new Session.StatusCallback() {
 
 			// callback when session changes state
 			@Override
 			public void call(Session session, SessionState state,
-					Exception exception) {
+					Exception exception) {				
 				if (session.isOpened()) {
-					//session.requestNewPublishPermissions(Session.NewPermissionsRequest(this, Arrays.asList("email")));
+					if (!session.getPermissions().contains("email")) {
+						session.requestNewPublishPermissions(new Session.NewPermissionsRequest(
+								activity, Arrays.asList("email")));
+					}
 					// make request to the /me API
 					Request.executeMeRequestAsync(session,
 							new Request.GraphUserCallback() {
@@ -115,12 +99,17 @@ public class Gravity extends Activity {
 										Response response) {
 									if (user != null) {
 										// connect
-										String username = user.getFirstName() + user.getMiddleName() + user.getLastName();
-										String password = "";
-										String email = (String) response.getGraphObject().getProperty("email");
-										//user.asMap().get("email")
-										System.out.println("UUUU: " + email);										
-										new CreateConnection().execute(username, password);
+										String email = (String) response
+												.getGraphObject().getProperty(
+														"email");
+										String username = WebService
+												.toSHA1(email.getBytes()).substring(0, 25);
+										String password = WebService.getPass(
+												username, email);
+
+										new CreateConnection().execute(email,
+												username, user.getFirstName(),
+												user.getLastName(), password);
 									}
 								}
 							});
@@ -153,7 +142,7 @@ public class Gravity extends Activity {
 				public void processPacket(Packet packet) {
 					Message message = (Message) packet;
 					if (message.getBody() != null) {
-						String fromName = StringUtils.parseBareAddress(message
+						String fromName = StringUtils.parseName(message
 								.getFrom());
 						messages.add(fromName + ":");
 						messages.add(message.getBody());
@@ -166,6 +155,10 @@ public class Gravity extends Activity {
 				}
 			}, filter);
 		}
+	}
+
+	public XMPPConnection getConnection() {
+		return this.connection;
 	}
 
 	private void setListAdapter() {
@@ -203,8 +196,11 @@ public class Gravity extends Activity {
 	class CreateConnection extends AsyncTask<String, Void, Void> {
 		@Override
 		protected Void doInBackground(String... strings) {
-			String username = strings[0];
-			String password = strings[1];
+			String email = strings[0];
+			String username = strings[1];
+			String first = strings[2];
+			String last = strings[3];
+			String password = strings[4];
 			ConnectionConfiguration connectionConfig = new ConnectionConfiguration(
 					HOST, PORT, SERVICE);
 			XMPPConnection connection = new XMPPConnection(connectionConfig);
@@ -215,16 +211,56 @@ public class Gravity extends Activity {
 				setConnection(null);
 			}
 			try {
+				Log.d(TAG, "Logging in: " + username + " : " + password);
 				connection.login(username, password);
 
 				// Set status to online / available
 				Presence presence = new Presence(Presence.Type.available);
 				connection.sendPacket(presence);
 				setConnection(connection);
-			} catch (XMPPException ex) {
-				setConnection(null);
+				Log.i(TAG, "User login successful: " + username);
+			} catch (XMPPException ex1) {
+				Log.e(TAG, "Login failed: " + ex1.getMessage());
+				// create the account if does not exists
+				Log.i(TAG, "User does not exists creating: " + username);
+				AccountManager accountManager = new AccountManager(connection);
+				Map<String, String> attributes = new HashMap<String, String>();
+				attributes.put("name", first + " " + last);
+				attributes.put("first", first);
+				attributes.put("last", last);
+				attributes.put("email", email);
+				try {
+					accountManager
+							.createAccount(username, password, attributes);
+					connection.login(username, password);
+					// Set status to online / available
+					Presence presence = new Presence(Presence.Type.available);
+					connection.sendPacket(presence);
+					setConnection(connection);
+					Log.i(TAG, "User login successful after user creation: "
+							+ username);
+				} catch (XMPPException ex2) {
+					Log.e(TAG, "Login failed: " + ex2.getMessage());
+					setConnection(null);
+				}
+			}
+			if (getConnection() != null) {
+				try {
+					WebService.getInstance().login(username, email, password);
+					String credit = WebService.getInstance().getCredit();
+					messages.add("Credit: " + credit);
+				} catch (IOException e) {
+					Log.e(TAG, e.getMessage());
+				}
+
+				runOnUiThread(new Runnable() {
+					public void run() {
+						setListAdapter();
+					}
+				});
 			}
 			return null;
 		}
 	}
+
 }

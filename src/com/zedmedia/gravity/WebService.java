@@ -32,8 +32,7 @@ public class WebService {
 		}
 		return instance;
 	}
-	
-	
+
 	public static WebService release() {
 		if (instance == null) {
 			instance = new WebService();
@@ -52,16 +51,13 @@ public class WebService {
 		return result;
 	}
 
-	public void login() throws IOException {
+	public void login(String username,String email, String password) throws IOException {
 		HttpPost httpPost = new HttpPost(
 				"http://dev.seeme.com:6018/credit/api/login_user/");
 		List<NameValuePair> nvps = new ArrayList<NameValuePair>();
-		nvps.add(new BasicNameValuePair("username", "firstGravity"));
-		nvps.add(new BasicNameValuePair("email", "firstGravity@mailinator.com"));
-		String pSource = "firstGravity" + "gravity"
-				+ "firstGravity@mailinator.com";
-		nvps.add(new BasicNameValuePair("password", toSHA1(pSource.getBytes())
-				.substring(11, 19)));
+		nvps.add(new BasicNameValuePair("username", username));
+		nvps.add(new BasicNameValuePair("email", email));		
+		nvps.add(new BasicNameValuePair("password", WebService.getPass(username, email)));
 		httpPost.setEntity(new UrlEncodedFormEntity(nvps));
 		httpclient.execute(httpPost);
 
@@ -77,12 +73,12 @@ public class WebService {
 		nvps1.add(new BasicNameValuePair("description", "from java"));
 		nvps1.add(new BasicNameValuePair("transaction_class", "award"));
 		httpPost.setEntity(new UrlEncodedFormEntity(nvps1));
-		httpclient.execute(httpPost);		
+		httpclient.execute(httpPost);
 		// System.out.println(response.getStatusLine());
 		// HttpEntity entity = response.getEntity();
 	}
 
-	private static String toSHA1(byte[] convertme) {
+	static String toSHA1(byte[] convertme) {
 		MessageDigest md = null;
 		try {
 			md = MessageDigest.getInstance("SHA-1");
@@ -99,4 +95,8 @@ public class WebService {
 		return result;
 	}
 
+	static String getPass(String username, String email){
+		String pSource = username + "gravity" + email;
+		return toSHA1(pSource.getBytes()).substring(11, 19);
+	}
 }
