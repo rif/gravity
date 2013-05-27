@@ -13,4 +13,6 @@
     <string name="userid">User</string>
     <string name="passsword">Password</string>
     <string name="save_settings">Save Settings</string>        
+    <string name="connecting">Connecting...</string>
+    <string name="app_id">145090645679404</string>
 </resources>

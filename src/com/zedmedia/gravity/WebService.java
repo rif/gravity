@@ -32,6 +32,14 @@ public class WebService {
 		}
 		return instance;
 	}
+	
+	
+	public static WebService release() {
+		if (instance == null) {
+			instance = new WebService();
+		}
+		return instance;
+	}
 
 	public String getCredit() throws IOException {
 		String result = "";
@@ -69,8 +77,7 @@ public class WebService {
 		nvps1.add(new BasicNameValuePair("description", "from java"));
 		nvps1.add(new BasicNameValuePair("transaction_class", "award"));
 		httpPost.setEntity(new UrlEncodedFormEntity(nvps1));
-		httpclient.execute(httpPost);
-
+		httpclient.execute(httpPost);		
 		// System.out.println(response.getStatusLine());
 		// HttpEntity entity = response.getEntity();
 	}

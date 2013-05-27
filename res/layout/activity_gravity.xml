@@ -9,6 +9,13 @@
     android:orientation="horizontal"     
     android:layout_width="match_parent" 
     android:layout_height="wrap_content"> 
+    <com.facebook.widget.LoginButton
+        android:id="@+id/authButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="30dp"
+        />
     <EditText
             android:id="@+id/recipient" 
             android:layout_weight="1"           
