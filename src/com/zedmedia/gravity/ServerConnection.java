@@ -32,7 +32,7 @@ import org.jivesoftware.smack.packet.Packet;
 import org.jivesoftware.smack.packet.Presence;
 import org.jivesoftware.smack.util.StringUtils;
 
-import android.app.Activity;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -46,6 +46,9 @@ import com.facebook.Settings;
 import com.facebook.model.GraphUser;
 
 public class ServerConnection {
+	public final static String USER_ID = "com.zedmedia.gravity.USER_ID";
+	public final static String MESSAGE_FROM = "com.zedmedia.gravity.MESSAGE_FROM";
+	public final static String MESSAGE_BODY = "com.zedmedia.gravity.MESSAGE_BODY";
 	public static final String HOST = "ded697.ded.reflected.net";
 	public static final int PORT = 5222;
 	public static final String SERVICE = "";
@@ -53,8 +56,8 @@ public class ServerConnection {
 	private HttpClient httpclient;
 	private XMPPConnection connection;
 	private Session.StatusCallback statusCallback = new SessionStatusCallback();
-	private RosterActivity mainActivity;
-	private Map<String, Activity> activeChats;
+	private Gravity mainActivity;
+	private Map<String, ChatActivity> activeChats;
 	private static ServerConnection serverConnection;
 
 	private ServerConnection() {
@@ -68,7 +71,7 @@ public class ServerConnection {
 		return serverConnection;
 	}
 
-	public void init(Bundle savedInstanceState, RosterActivity main) {
+	public void init(Bundle savedInstanceState, Gravity main) {
 		Settings.addLoggingBehavior(LoggingBehavior.INCLUDE_ACCESS_TOKENS);
 		mainActivity = main;
 		Session session = Session.getActiveSession();
@@ -94,7 +97,7 @@ public class ServerConnection {
 		} else {
 			Session.openActiveSession(mainActivity, true, statusCallback);
 		}
-		activeChats = new HashMap<String, Activity>();
+		activeChats = new HashMap<String, ChatActivity>();
 	}
 
 	// Called by settings when connection is established
@@ -107,14 +110,26 @@ public class ServerConnection {
 				public void processPacket(Packet packet) {
 					Message message = (Message) packet;
 					if (message.getBody() != null) {
-						String to = StringUtils.parseBareAddress(message
+						String from = StringUtils.parseBareAddress(message
 								.getFrom());
-						Log.i(TAG, "message from: " + to);
-						// display message
-						// get or add chat activity for this destination
+						ChatActivity chatActivity = activeChats.get(from);
+						if (chatActivity != null) {
+							chatActivity.displayMessage(message);
+						} else {
+							// start new chat activity
+							Intent intent = new Intent(mainActivity,
+									ChatActivity.class);
+							intent.putExtra(USER_ID, from);							
+							intent.putExtra(MESSAGE_FROM,
+									StringUtils.parseName(message.getFrom()));
+							intent.putExtra(MESSAGE_BODY, message.getBody());
+							mainActivity.startActivity(intent);
+							// the new activity registered itself
+							chatActivity = activeChats.get(from);
+						}
 					}
 				}
-			}, filter);					
+			}, filter);
 		}
 	}
 
@@ -126,7 +141,7 @@ public class ServerConnection {
 		return statusCallback;
 	}
 
-	public void addActiveChat(String to, Activity activity) {
+	public void addActiveChat(String to, ChatActivity activity) {
 		activeChats.put(to, activity);
 	}
 
@@ -247,13 +262,13 @@ public class ServerConnection {
 					setConnection(null);
 				}
 			}
-			if (getConnection() != null) {				
+			if (getConnection() != null) {
 				try {
 					getInstance().login(username, email, password);
 
 				} catch (IOException e) {
 					Log.e(TAG, e.getMessage());
-				}				
+				}
 				mainActivity.setRoster(connection.getRoster());
 			}
 			return null;

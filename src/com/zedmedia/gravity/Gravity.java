@@ -6,6 +6,7 @@ import java.util.Collection;
 import org.jivesoftware.smack.Roster;
 import org.jivesoftware.smack.RosterEntry;
 import org.jivesoftware.smack.RosterListener;
+import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.packet.Presence;
 
 import android.app.Activity;
@@ -18,16 +19,17 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import com.facebook.Session;
 
-public class RosterActivity extends Activity implements RosterListener {
-	public final static String USER_ID = "com.zedmedia.gravity.USER_ID";
+public class Gravity extends Activity implements RosterListener {	
 	private static final String TAG = "[GRAVITY]";
 	private ArrayList<String> buddies = new ArrayList<String>();
 	private ServerConnection serverConnection;
 	private Roster roster;
 	private ListView list;
+	private TextView addBuddyText;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -35,6 +37,7 @@ public class RosterActivity extends Activity implements RosterListener {
 		setContentView(R.layout.activity_roster);
 		serverConnection = ServerConnection.getInstance();
 		serverConnection.init(savedInstanceState, this);
+		addBuddyText = (TextView) this.findViewById(R.id.addBuddyText);
 		list = (ListView) this.findViewById(R.id.buddyList);
 		list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
@@ -42,10 +45,10 @@ public class RosterActivity extends Activity implements RosterListener {
 			public void onItemClick(AdapterView<?> parent, final View view,
 					int position, long id) {
 				final String destinationUserId = (String) parent
-						.getItemAtPosition(position);
-				Intent intent = new Intent(RosterActivity.this,
-						ChatActivity.class);
-				intent.putExtra(USER_ID, destinationUserId);
+						.getItemAtPosition(position);				
+				Intent intent = new Intent(Gravity.this,
+						ChatActivity.class);				
+				intent.putExtra(ServerConnection.USER_ID, destinationUserId);				
 				startActivity(intent);
 			}
 
@@ -60,19 +63,40 @@ public class RosterActivity extends Activity implements RosterListener {
 
 		Log.i(TAG, "Getting roster members: " + roster.getEntries().size());
 		Collection<RosterEntry> entries = roster.getEntries();
-		Presence presence;
 		buddies.clear();
 		for (RosterEntry entry : entries) {
-			presence = roster.getPresence(entry.getUser());
-			buddies.add(entry.getUser());
-			System.out.println(entry.getUser());
-			System.out.println(presence);
+			buddies.add(entry.getUser());			
 		}
 		runOnUiThread(new Runnable() {
 			public void run() {
 				setListAdapter();
 			}
 		});
+	}
+
+	/*private void clearAllRosterEntries() {
+		Collection<RosterEntry> entries = roster.getEntries();
+		buddies.clear();
+		for (RosterEntry entry : entries) {
+			try {
+				roster.removeEntry(entry);
+			} catch (XMPPException e) {
+				Log.e(TAG, "Could not remove roster entry: " + e.getMessage());
+			}
+		}
+	}*/
+
+	/** Called when the user clicks the Add Buddy button */
+	public void addBuddy(View view) {
+		String userId = addBuddyText.getText().toString();
+		addBuddyText.setText("");
+
+		try {
+			Log.d(TAG, "Roster: " + roster);
+			roster.createEntry(userId, userId, null);
+		} catch (XMPPException e) {
+			Log.e(TAG, "Coud not create roster entry: " + e.getMessage());
+		}
 	}
 
 	private void setListAdapter() {
