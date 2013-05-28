@@ -87,6 +87,7 @@ public class ChatActivity extends Activity {
 		text.setText("");
 
 		Message msg = new Message(recipient, Message.Type.chat);
+		Log.d(TAG, "Recipient: " + recipient);
 		msg.setBody(message);
 		serverConnection.getConnection().sendPacket(msg);
 		messages.add(serverConnection.getConnection().getUser() + ":");

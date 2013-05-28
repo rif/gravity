@@ -23,7 +23,7 @@ import android.widget.TextView;
 
 import com.facebook.Session;
 
-public class Gravity extends Activity implements RosterListener {	
+public class Gravity extends Activity implements RosterListener {
 	private static final String TAG = "[GRAVITY]";
 	private ArrayList<String> buddies = new ArrayList<String>();
 	private ServerConnection serverConnection;
@@ -45,10 +45,9 @@ public class Gravity extends Activity implements RosterListener {
 			public void onItemClick(AdapterView<?> parent, final View view,
 					int position, long id) {
 				final String destinationUserId = (String) parent
-						.getItemAtPosition(position);				
-				Intent intent = new Intent(Gravity.this,
-						ChatActivity.class);				
-				intent.putExtra(ServerConnection.USER_ID, destinationUserId);				
+						.getItemAtPosition(position);
+				Intent intent = new Intent(Gravity.this, ChatActivity.class);
+				intent.putExtra(ServerConnection.USER_ID, destinationUserId);
 				startActivity(intent);
 			}
 
@@ -65,7 +64,9 @@ public class Gravity extends Activity implements RosterListener {
 		Collection<RosterEntry> entries = roster.getEntries();
 		buddies.clear();
 		for (RosterEntry entry : entries) {
-			buddies.add(entry.getUser());			
+			if (entry.getStatus() == null) {
+				buddies.add(entry.getUser());
+			}
 		}
 		runOnUiThread(new Runnable() {
 			public void run() {
@@ -74,17 +75,12 @@ public class Gravity extends Activity implements RosterListener {
 		});
 	}
 
-	/*private void clearAllRosterEntries() {
-		Collection<RosterEntry> entries = roster.getEntries();
-		buddies.clear();
-		for (RosterEntry entry : entries) {
-			try {
-				roster.removeEntry(entry);
-			} catch (XMPPException e) {
-				Log.e(TAG, "Could not remove roster entry: " + e.getMessage());
-			}
-		}
-	}*/
+	/*
+	 * private void clearAllRosterEntries() { Collection<RosterEntry> entries =
+	 * roster.getEntries(); buddies.clear(); for (RosterEntry entry : entries) {
+	 * try { roster.removeEntry(entry); } catch (XMPPException e) { Log.e(TAG,
+	 * "Could not remove roster entry: " + e.getMessage()); } } }
+	 */
 
 	/** Called when the user clicks the Add Buddy button */
 	public void addBuddy(View view) {
@@ -93,6 +89,10 @@ public class Gravity extends Activity implements RosterListener {
 
 		try {
 			Log.d(TAG, "Roster: " + roster);
+			String uid = userId;
+			if (!uid.endsWith(ServerConnection.HOST)) {
+				uid += "@" + ServerConnection.HOST;
+			}
 			roster.createEntry(userId, userId, null);
 		} catch (XMPPException e) {
 			Log.e(TAG, "Coud not create roster entry: " + e.getMessage());
@@ -154,6 +154,10 @@ public class Gravity extends Activity implements RosterListener {
 
 	public void entriesDeleted(Collection<String> addresses) {
 		Log.d(TAG, "entries deleted: " + addresses);
+		for (String address : addresses) {
+			buddies.remove(address);
+		}
+		setListAdapter();
 	}
 
 	public void entriesUpdated(Collection<String> addresses) {
@@ -168,7 +172,10 @@ public class Gravity extends Activity implements RosterListener {
 	@Override
 	public void entriesAdded(Collection<String> addresses) {
 		Log.d(TAG, "entries addedd: " + addresses);
-
+		for (String address : addresses) {
+			buddies.add(address);
+		}
+		setListAdapter();
 	}
 
 }
