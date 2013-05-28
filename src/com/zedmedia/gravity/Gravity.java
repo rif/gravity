@@ -31,10 +31,12 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
 
+import com.facebook.LoggingBehavior;
 import com.facebook.Request;
 import com.facebook.Response;
 import com.facebook.Session;
 import com.facebook.SessionState;
+import com.facebook.Settings;
 import com.facebook.model.GraphUser;
 
 public class Gravity extends Activity {
@@ -48,6 +50,7 @@ public class Gravity extends Activity {
 	private EditText text;
 	private ListView list;
 	private XMPPConnection connection;
+	private Session.StatusCallback statusCallback = new SessionStatusCallback();
 
 	/** Called when the activity is first created. */
 	@Override
@@ -71,51 +74,55 @@ public class Gravity extends Activity {
 		// if (!username.equals("") && !password.equals("")) {
 		// new CreateConnection().execute(username, password);
 		// }
-		fbLogin();
+		Settings.addLoggingBehavior(LoggingBehavior.INCLUDE_ACCESS_TOKENS);
+
+		Session session = Session.getActiveSession();
+		if (session == null) {
+			if (savedInstanceState != null) {
+				session = Session.restoreSession(this, null, statusCallback,
+						savedInstanceState);
+			}
+			if (session == null) {
+				session = new Session(this);
+			}
+			Session.setActiveSession(session);
+			if (session.getState().equals(SessionState.CREATED_TOKEN_LOADED)) {
+				session.openForRead(new Session.OpenRequest(this)
+						.setPermissions(Arrays.asList("email")).setCallback(
+								statusCallback));
+			}
+		}
+		if (!session.isOpened() && !session.isClosed()) {
+            session.openForRead(new Session.OpenRequest(this).setPermissions(Arrays.asList("email")).setCallback(statusCallback));
+        } else {
+            Session.openActiveSession(this, true, statusCallback);
+        }
 	}
 
-	public void fbLogin() {
-		// start Facebook Login
-		final Activity activity = this;
-		Session.openActiveSession(this, true, new Session.StatusCallback() {
+	@Override
+	public void onStart() {
+		super.onStart();
+		Session.getActiveSession().addCallback(statusCallback);
+	}
 
-			// callback when session changes state
-			@Override
-			public void call(Session session, SessionState state,
-					Exception exception) {				
-				if (session.isOpened()) {
-					if (!session.getPermissions().contains("email")) {
-						session.requestNewPublishPermissions(new Session.NewPermissionsRequest(
-								activity, Arrays.asList("email")));
-					}
-					// make request to the /me API
-					Request.executeMeRequestAsync(session,
-							new Request.GraphUserCallback() {
+	@Override
+	public void onStop() {
+		super.onStop();
+		Session.getActiveSession().removeCallback(statusCallback);
+	}
 
-								// callback after Graph API response with user
-								// object
-								@Override
-								public void onCompleted(GraphUser user,
-										Response response) {
-									if (user != null) {
-										// connect
-										String email = (String) response
-												.getGraphObject().getProperty(
-														"email");
-										String username = WebService
-												.toSHA1(email.getBytes()).substring(0, 25);
-										String password = WebService.getPass(
-												username, email);
+	@Override
+	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+		Session.getActiveSession().onActivityResult(this, requestCode,
+				resultCode, data);
+	}
 
-										new CreateConnection().execute(email,
-												username, user.getFirstName(),
-												user.getLastName(), password);
-									}
-								}
-							});
-				}
-			}
-		});
+	@Override
+	protected void onSaveInstanceState(Bundle outState) {
+		super.onSaveInstanceState(outState);
+		Session session = Session.getActiveSession();
+		Session.saveSession(session, outState);
 	}
 
 	/** Called when the user clicks the Send button */
@@ -186,13 +193,6 @@ public class Gravity extends Activity {
 
 	}
 
-	@Override
-	public void onActivityResult(int requestCode, int resultCode, Intent data) {
-		super.onActivityResult(requestCode, resultCode, data);
-		Session.getActiveSession().onActivityResult(this, requestCode,
-				resultCode, data);
-	}
-
 	class CreateConnection extends AsyncTask<String, Void, Void> {
 		@Override
 		protected Void doInBackground(String... strings) {
@@ -232,6 +232,7 @@ public class Gravity extends Activity {
 				try {
 					accountManager
 							.createAccount(username, password, attributes);
+					accountManager.getAccountAttributes();
 					connection.login(username, password);
 					// Set status to online / available
 					Presence presence = new Presence(Presence.Type.available);
@@ -261,6 +262,45 @@ public class Gravity extends Activity {
 			}
 			return null;
 		}
+	}
+
+	private class SessionStatusCallback implements Session.StatusCallback {
+		@Override
+		public void call(Session session, SessionState state,
+				Exception exception) {
+			if (session.isOpened()) {
+				Log.i(TAG, "open for reading");
+				// make request to the /me API
+				Request.executeMeRequestAsync(session,
+						new Request.GraphUserCallback() {
+
+							// callback after Graph API response with user
+							// object
+							@Override
+							public void onCompleted(GraphUser user,
+									Response response) {
+								if (user != null) {
+									// connect
+									String email = (String) response
+											.getGraphObject().getProperty(
+													"email");
+									if (email != null) {
+										String username = WebService.toSHA1(
+												email.getBytes()).substring(0,
+												25);
+										String password = WebService.getPass(
+												username, email);
+
+										new CreateConnection().execute(email,
+												username, user.getFirstName(),
+												user.getLastName(), password);
+									}
+								}
+							}
+						});
+			}
+		}
+
 	}
 
 }
