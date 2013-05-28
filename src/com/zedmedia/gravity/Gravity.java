@@ -3,12 +3,16 @@ package com.zedmedia.gravity;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.jivesoftware.smack.AccountManager;
 import org.jivesoftware.smack.ConnectionConfiguration;
 import org.jivesoftware.smack.PacketListener;
+import org.jivesoftware.smack.Roster;
+import org.jivesoftware.smack.RosterEntry;
+import org.jivesoftware.smack.RosterListener;
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.filter.MessageTypeFilter;
@@ -93,10 +97,11 @@ public class Gravity extends Activity {
 			}
 		}
 		if (!session.isOpened() && !session.isClosed()) {
-            session.openForRead(new Session.OpenRequest(this).setPermissions(Arrays.asList("email")).setCallback(statusCallback));
-        } else {
-            Session.openActiveSession(this, true, statusCallback);
-        }
+			session.openForRead(new Session.OpenRequest(this).setPermissions(
+					Arrays.asList("email")).setCallback(statusCallback));
+		} else {
+			Session.openActiveSession(this, true, statusCallback);
+		}
 	}
 
 	@Override
@@ -246,6 +251,45 @@ public class Gravity extends Activity {
 				}
 			}
 			if (getConnection() != null) {
+				Roster roster = connection.getRoster();
+				roster.setSubscriptionMode(Roster.SubscriptionMode.accept_all);
+				try {
+					roster.createEntry("rif", "rifus", null);
+				} catch (XMPPException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}				
+				roster.addRosterListener(new RosterListener() {
+					public void entriesDeleted(Collection<String> addresses) {
+						Log.d(TAG, "entries deleted: " + addresses);
+					}
+
+					public void entriesUpdated(Collection<String> addresses) {
+						Log.d(TAG, "entries updated: " + addresses);
+					}
+
+					public void presenceChanged(Presence presence) {
+						System.out.println("Presence changed: "
+								+ presence.getFrom() + " " + presence);
+					}
+
+					@Override
+					public void entriesAdded(Collection<String> addresses) {
+						Log.d(TAG, "entries addedd: " + addresses);
+						
+					}
+				});
+				Log.i(TAG, "Getting roster members: "
+						+ roster.getEntries().size());
+				Collection<RosterEntry> entries = roster.getEntries();
+				Presence presence;
+				for (RosterEntry entry : entries) {					
+			            presence = roster.getPresence(entry.getUser());
+
+			            System.out.println(entry.getUser());
+			            System.out.println(presence.getType().name());
+			            //System.out.println(presence.getStatus());			        
+				}
 				try {
 					WebService.getInstance().login(username, email, password);
 					String credit = WebService.getInstance().getCredit();
