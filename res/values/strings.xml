@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Gravity</string>    
+
+    <string name="app_name">Gravity</string>
     <string name="edit_message">Enter a message</string>
     <string name="recipient">Recipient id</string>
     <string name="button_send">Send</string>
@@ -12,7 +13,10 @@
     <string name="service">Service</string>
     <string name="userid">User</string>
     <string name="passsword">Password</string>
-    <string name="save_settings">Save Settings</string>        
+    <string name="save_settings">Save Settings</string>
     <string name="connecting">Connecting</string>
     <string name="app_id">145090645679404</string>
+    <string name="title_activity_roster">RosterActivity</string>
+    <string name="hello_world">Hello world!</string>
+
 </resources>
