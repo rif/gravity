@@ -10,7 +10,9 @@ import org.jivesoftware.smack.RosterListener;
 import org.jivesoftware.smack.packet.Presence;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -31,6 +33,7 @@ public class Gravity extends Activity implements RosterListener {
 	private ListView list;
 	private GroupDialog groupDialog;
 	private BuddyDialog buddyDialog;
+	private FeesDialog feesDialog;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -38,8 +41,25 @@ public class Gravity extends Activity implements RosterListener {
 		setContentView(R.layout.activity_roster);
 		groupDialog = new GroupDialog(this);
 		buddyDialog = new BuddyDialog(this);
+		feesDialog = new FeesDialog(this);
 		serverConnection = ServerConnection.getInstance();
-		serverConnection.init(savedInstanceState, this);
+		// try to establish connection
+		SharedPreferences sharedPref = this
+				.getPreferences(Context.MODE_PRIVATE);
+		String email = sharedPref.getString(ServerConnection.EMAIL, "");
+		String username = sharedPref.getString(ServerConnection.USER_NAME, "");
+		String firstName = sharedPref
+				.getString(ServerConnection.FIRST_NAME, "");
+		String lastName = sharedPref.getString(ServerConnection.LAST_NAME, "");
+		String password = sharedPref.getString(ServerConnection.PASS, "");
+		serverConnection.setMainActivity(this);
+		if (!username.equals("") && !password.equals("")) {
+			serverConnection.new CreateConnection().execute(email, username,
+					firstName, lastName, password);
+
+		} else {
+			serverConnection.init(savedInstanceState, this);
+		}
 		list = (ListView) this.findViewById(R.id.buddyList);
 		list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
@@ -72,7 +92,7 @@ public class Gravity extends Activity implements RosterListener {
 				}
 				if (group != null) {
 					buddyDialog.setGroup(group.getName());
-				}				
+				}
 
 				return true;
 			}
@@ -135,29 +155,37 @@ public class Gravity extends Activity implements RosterListener {
 	@Override
 	public void onStart() {
 		super.onStart();
-		Session.getActiveSession().addCallback(
-				serverConnection.getFacebookStatusCallback());
+		Session s = Session.getActiveSession();
+		if (s != null) {
+			s.addCallback(serverConnection.getFacebookStatusCallback());
+		}
 	}
 
 	@Override
 	public void onStop() {
 		super.onStop();
-		Session.getActiveSession().removeCallback(
-				serverConnection.getFacebookStatusCallback());
+		Session s = Session.getActiveSession();
+		if (s != null) {
+			s.removeCallback(serverConnection.getFacebookStatusCallback());
+		}
 	}
 
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
-		Session.getActiveSession().onActivityResult(this, requestCode,
-				resultCode, data);
+		Session s = Session.getActiveSession();
+		if (s != null) {
+			s.onActivityResult(this, requestCode, resultCode, data);
+		}
 	}
 
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
 		Session session = Session.getActiveSession();
-		Session.saveSession(session, outState);
+		if (session != null) {
+			Session.saveSession(session, outState);
+		}
 	}
 
 	@Override
@@ -178,6 +206,9 @@ public class Gravity extends Activity implements RosterListener {
 			return true;
 		case R.id.add_group:
 			groupDialog.show();
+			return true;
+		case R.id.edit_fees:
+			feesDialog.show();
 			return true;
 		default:
 			return super.onOptionsItemSelected(item);

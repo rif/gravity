@@ -11,6 +11,11 @@
         android:showAsAction="never"
         android:title="@string/group_add"/>
     <item
+        android:id="@+id/edit_fees"
+        android:orderInCategory="95"
+        android:showAsAction="never"
+        android:title="@string/edit_fees"/>
+    <item
         android:id="@+id/quit"
         android:orderInCategory="100"
         android:showAsAction="never"

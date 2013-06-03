@@ -17,7 +17,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 
-public class BuddyDialog extends Dialog implements View.OnClickListener {
+public class BuddyDialog extends Dialog {
 	private static final String TAG = "[Gravity user]";
 	private Gravity chatClient;
 	private Roster roster;
@@ -39,7 +39,50 @@ public class BuddyDialog extends Dialog implements View.OnClickListener {
 		userNameText = (EditText) this.findViewById(R.id.user_name);
 		userGroupText = (EditText) this.findViewById(R.id.user_group);
 		Button ok = (Button) findViewById(R.id.user_add_button);
-		ok.setOnClickListener(this);
+		ok.setOnClickListener(new View.OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				String userId = userIdText.getText().toString().trim();
+				// userId = ServerConnection.toSHA1(userId);
+				userId += "@" + ServerConnection.HOST;
+				if (editedEntry == null) {
+					try {
+						roster.createEntry(userId, userNameText.getText()
+								.toString().trim(),
+								new String[] { userGroupText.getText()
+										.toString().trim() });
+					} catch (XMPPException e) {
+						Log.e(TAG,
+								"Coud not create roster entry: "
+										+ e.getMessage());
+					}
+				} else {
+					editedEntry.setName(userNameText.getText().toString());
+					String group = userGroupText.getText().toString().trim();
+					RosterGroup oldGroup = null;
+					for (RosterGroup rg : editedEntry.getGroups()) {
+						oldGroup = rg;
+						break;
+					}
+					if (!group.equals(oldGroup.getName())) {
+						try {
+							oldGroup.removeEntry(editedEntry);
+							RosterGroup newGroup = roster.getGroup(group);
+							if (newGroup == null) {
+								newGroup = roster.createGroup(group);
+							}
+							newGroup.addEntry(editedEntry);
+						} catch (XMPPException e) {
+							Log.e(TAG, e.getMessage());
+						}
+					}
+				}
+				dismiss();
+
+			}
+
+		});
 		roster = ServerConnection.getInstance().getConnection().getRoster();
 		List<String> groups = new ArrayList<String>();
 		for (RosterGroup rg : roster.getGroups()) {
@@ -56,45 +99,8 @@ public class BuddyDialog extends Dialog implements View.OnClickListener {
 	public void setRosterEntry(RosterEntry re) {
 		editedEntry = re;
 		setTitle("Edit friend");
-		// remove the id edit text		
+		// remove the id edit text
 		((LinearLayout) userIdText.getParent()).removeView(userIdText);
-	}
-
-	@Override
-	public void onClick(View arg0) {
-		String userId = userIdText.getText().toString().trim();
-		// userId = ServerConnection.toSHA1(userId);
-		userId += "@" + ServerConnection.HOST;
-		if (editedEntry == null) {
-			try {
-				roster.createEntry(userId, userNameText.getText().toString()
-						.trim(), new String[] { userGroupText.getText()
-						.toString().trim() });
-			} catch (XMPPException e) {
-				Log.e(TAG, "Coud not create roster entry: " + e.getMessage());
-			}
-		} else {
-			editedEntry.setName(userNameText.getText().toString());
-			String group = userGroupText.getText().toString().trim();
-			RosterGroup oldGroup = null;
-			for (RosterGroup rg : editedEntry.getGroups()) {
-				oldGroup = rg;
-				break;
-			}
-			if (!group.equals(oldGroup.getName())) {
-				try {
-					oldGroup.removeEntry(editedEntry);
-					RosterGroup newGroup = roster.getGroup(group);
-					if (newGroup == null) {
-						newGroup = roster.createGroup(group);
-					}
-					newGroup.addEntry(editedEntry);
-				} catch (XMPPException e) {
-					Log.e(TAG, e.getMessage());
-				}
-			}
-		}
-		this.dismiss();
 	}
 
 	public void setId(String id) {

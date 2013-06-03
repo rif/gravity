@@ -33,7 +33,9 @@ import org.jivesoftware.smack.packet.Packet;
 import org.jivesoftware.smack.packet.Presence;
 import org.jivesoftware.smack.util.StringUtils;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -47,6 +49,11 @@ import com.facebook.Settings;
 import com.facebook.model.GraphUser;
 
 public class ServerConnection {
+	public final static String EMAIL = "com.zedmedia.gravity.EMAIL";
+	public final static String USER_NAME = "com.zedmedia.gravity.USER_NAME";
+	public final static String FIRST_NAME = "com.zedmedia.gravity.FIRST_NAME";
+	public final static String LAST_NAME = "com.zedmedia.gravity.LAST_NAME";
+	public final static String PASS = "com.zedmedia.gravity.PASS";
 	public final static String USER_ID = "com.zedmedia.gravity.USER_ID";
 	public final static String MESSAGE_FROM = "com.zedmedia.gravity.MESSAGE_FROM";
 	public final static String MESSAGE_BODY = "com.zedmedia.gravity.MESSAGE_BODY";
@@ -71,10 +78,13 @@ public class ServerConnection {
 		}
 		return serverConnection;
 	}
+	
+	public void setMainActivity(Gravity gravity){
+		mainActivity = gravity;
+	}
 
 	public void init(Bundle savedInstanceState, Gravity main) {
-		Settings.addLoggingBehavior(LoggingBehavior.INCLUDE_ACCESS_TOKENS);
-		mainActivity = main;
+		Settings.addLoggingBehavior(LoggingBehavior.INCLUDE_ACCESS_TOKENS);		
 		Session session = Session.getActiveSession();
 		if (session == null) {
 			if (savedInstanceState != null) {
@@ -280,7 +290,7 @@ public class ServerConnection {
 
 				} catch (IOException e) {
 					Log.e(TAG, e.getMessage());
-				}
+				}				
 				mainActivity.setRoster(connection.getRoster());
 			}
 			return null;
@@ -316,6 +326,20 @@ public class ServerConnection {
 										new CreateConnection().execute(email,
 												username, user.getFirstName(),
 												user.getLastName(), password);
+										// save credentials
+										SharedPreferences sharedPref = mainActivity
+												.getPreferences(Context.MODE_PRIVATE);
+										SharedPreferences.Editor editor = sharedPref
+												.edit();
+										editor.putString(EMAIL, email);
+										editor.putString(USER_NAME, username);
+										editor.putString(FIRST_NAME,
+												user.getFirstName());
+										editor.putString(LAST_NAME,
+												user.getLastName());
+										editor.putString(PASS, password);
+										// Commit the edits!
+										editor.commit();
 									}
 								}
 							}

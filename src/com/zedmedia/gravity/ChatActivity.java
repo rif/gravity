@@ -47,16 +47,7 @@ public class ChatActivity extends Activity {
 			displayMessage(getRecipientName(recipient), body);
 		}
 
-		setTitle(getRecipientName(null));
-		// try to establish connection
-		// SharedPreferences sharedPref = this
-		// .getPreferences(Context.MODE_PRIVATE);
-		// String username = sharedPref.getString("" + R.id.userid, "");
-		// String password = sharedPref.getString("" + R.id.password, "");
-		// if (!username.equals("") && !password.equals("")) {
-		// new CreateConnection().execute(username, password);
-		// }
-
+		setTitle(getRecipientName(null));		
 	}
 
 	public String getRecipientName(RosterEntry entry) {

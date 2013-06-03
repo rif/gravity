@@ -7,12 +7,11 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
-public class GroupDialog extends Dialog implements
-		android.view.View.OnClickListener {
+public class GroupDialog extends Dialog {
 	private Gravity chatActivity;
 
 	public GroupDialog(Gravity gravity) {
-		super(gravity);		
+		super(gravity);
 		chatActivity = gravity;
 	}
 
@@ -21,18 +20,20 @@ public class GroupDialog extends Dialog implements
 		setContentView(R.layout.add_group);
 		setTitle("Add new group");
 		Button ok = (Button) findViewById(R.id.group_add_button);
-		ok.setOnClickListener(this);
-	}
+		ok.setOnClickListener(new View.OnClickListener() {
 
-	@Override
-	public void onClick(View arg0) {
-		Roster roster = ServerConnection.getInstance().getConnection()
-				.getRoster();
-		EditText groupNameText = (EditText)this.findViewById(R.id.group_name);
-		String group = groupNameText.getText().toString();
-		roster.createGroup(group);	
-		chatActivity.setAddUserGroup(group);
-		this.dismiss();
-	}
+			@Override
+			public void onClick(View v) {
+				Roster roster = ServerConnection.getInstance().getConnection()
+						.getRoster();
+				EditText groupNameText = (EditText) GroupDialog.this
+						.findViewById(R.id.group_name);
+				String group = groupNameText.getText().toString();
+				roster.createGroup(group);
+				chatActivity.setAddUserGroup(group);
+				dismiss();
 
+			}
+		});
+	}
 }
