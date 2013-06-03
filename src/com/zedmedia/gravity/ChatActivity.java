@@ -2,6 +2,7 @@ package com.zedmedia.gravity;
 
 import java.util.ArrayList;
 
+import org.jivesoftware.smack.RosterEntry;
 import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smack.util.StringUtils;
 
@@ -18,10 +19,10 @@ public class ChatActivity extends Activity {
 	private static final String TAG = "[GRAVITY Chat]";
 	private ArrayList<String> messages = new ArrayList<String>();
 	private Handler handler = new Handler();
-	private String recipient;
+	private RosterEntry recipient;
 	private EditText text;
 	private ListView list;
-	ServerConnection serverConnection;
+	private ServerConnection serverConnection;
 
 	/** Called when the activity is first created. */
 	@Override
@@ -35,19 +36,18 @@ public class ChatActivity extends Activity {
 
 		text = (EditText) this.findViewById(R.id.message);
 		list = (ListView) this.findViewById(R.id.messageList);
-		setListAdapter();
-		recipient = getIntent().getStringExtra(ServerConnection.USER_ID);
-		if (!recipient.endsWith(ServerConnection.HOST)) {
-			recipient += "@" + ServerConnection.HOST;
-		}
+		// setListAdapter();
 		serverConnection = ServerConnection.getInstance();
+		String address = getIntent().getStringExtra(ServerConnection.USER_ID);
+		recipient = serverConnection.getConnection().getRoster()
+				.getEntry(address);
 		serverConnection.addActiveChat(recipient, this);
-		String from = getIntent().getStringExtra(ServerConnection.MESSAGE_FROM);
-		String body = getIntent().getStringExtra(ServerConnection.MESSAGE_BODY);
-		Log.d(TAG, "FROM: " + from + " BODY: " + body);
-		if (from != null && body != null) {
-			displayMessage(from, body);
+		String body = getIntent().getStringExtra(ServerConnection.MESSAGE_BODY);		
+		if (body != null) {
+			displayMessage(getRecipientName(recipient), body);
 		}
+
+		setTitle(getRecipientName(null));
 		// try to establish connection
 		// SharedPreferences sharedPref = this
 		// .getPreferences(Context.MODE_PRIVATE);
@@ -57,6 +57,17 @@ public class ChatActivity extends Activity {
 		// new CreateConnection().execute(username, password);
 		// }
 
+	}
+
+	public String getRecipientName(RosterEntry entry) {
+		if (entry == null) {
+			entry = this.recipient;
+		}
+		String title = recipient.getName();
+		if (title == null || title.trim().equals("")) {
+			title = entry.getUser();
+		}
+		return title;
 	}
 
 	public void displayMessage(Message message) {
@@ -86,11 +97,11 @@ public class ChatActivity extends Activity {
 		String message = text.getText().toString();
 		text.setText("");
 
-		Message msg = new Message(recipient, Message.Type.chat);
+		Message msg = new Message(recipient.getUser(), Message.Type.chat);
 		Log.d(TAG, "Recipient: " + recipient);
 		msg.setBody(message);
 		serverConnection.getConnection().sendPacket(msg);
-		messages.add(serverConnection.getConnection().getUser() + ":");
+		messages.add(serverConnection.getConnection().getAccountManager().getAccountAttribute("name") + ":");
 		messages.add(message);
 		setListAdapter();
 	}

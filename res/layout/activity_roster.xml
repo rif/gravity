@@ -5,36 +5,10 @@
     android:layout_height="match_parent"
     android:orientation="vertical" >
 
-    <LinearLayout        
+    <ListView
+        android:id="@+id/buddyList"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal" >
-        <EditText
-            android:id="@+id/addBuddyText"
-            android:layout_width="0dip"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:hint="@string/invite_message" />
+        android:layout_height="fill_parent"
+        android:scrollbarAlwaysDrawVerticalTrack="true" />
 
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:onClick="addBuddy"
-            android:text="@string/add_buddy" />
-    </LinearLayout>
-
-    <!-- Central row -->
-
-    <LinearLayout
-        android:layout_width="fill_parent"
-        android:layout_height="0dip"
-        android:layout_weight="1"
-        android:orientation="vertical" >
-
-        <ListView
-          android:id="@+id/buddyList"
-          android:layout_width="match_parent"
-          android:layout_height="fill_parent"
-          android:scrollbarAlwaysDrawVerticalTrack="true" />
-    </LinearLayout>
 </LinearLayout>

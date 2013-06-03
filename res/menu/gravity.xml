@@ -1,8 +1,19 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android" >
-    
-	<item
+
+    <item
+        android:id="@+id/add_user"
+        android:orderInCategory="80"
+        android:showAsAction="never"
+        android:title="@string/user_add"/>
+    <item
+        android:id="@+id/add_group"
+        android:orderInCategory="90"
+        android:showAsAction="never"
+        android:title="@string/group_add"/>
+    <item
         android:id="@+id/quit"
         android:orderInCategory="100"
         android:showAsAction="never"
         android:title="@string/action_quit"/>
+
 </menu>

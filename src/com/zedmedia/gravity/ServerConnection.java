@@ -23,6 +23,7 @@ import org.apache.http.util.EntityUtils;
 import org.jivesoftware.smack.AccountManager;
 import org.jivesoftware.smack.ConnectionConfiguration;
 import org.jivesoftware.smack.PacketListener;
+import org.jivesoftware.smack.RosterEntry;
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.filter.MessageTypeFilter;
@@ -57,7 +58,7 @@ public class ServerConnection {
 	private XMPPConnection connection;
 	private Session.StatusCallback statusCallback = new SessionStatusCallback();
 	private Gravity mainActivity;
-	private Map<String, ChatActivity> activeChats;
+	private Map<RosterEntry, ChatActivity> activeChats;
 	private static ServerConnection serverConnection;
 
 	private ServerConnection() {
@@ -97,7 +98,7 @@ public class ServerConnection {
 		} else {
 			Session.openActiveSession(mainActivity, true, statusCallback);
 		}
-		activeChats = new HashMap<String, ChatActivity>();
+		activeChats = new HashMap<RosterEntry, ChatActivity>();
 	}
 
 	// Called by settings when connection is established
@@ -112,16 +113,23 @@ public class ServerConnection {
 					if (message.getBody() != null) {
 						String from = StringUtils.parseBareAddress(message
 								.getFrom());
-						ChatActivity chatActivity = activeChats.get(from);
+						RosterEntry entry = getConnection().getRoster()
+								.getEntry(StringUtils.parseBareAddress(from));
+						ChatActivity chatActivity = null;
+						if (entry != null) {
+							chatActivity = activeChats.get(entry);
+						} else {
+							// receive messages from users not in your list
+							chatActivity = activeChats.get(StringUtils
+									.parseBareAddress(from));
+						}
 						if (chatActivity != null) {
 							chatActivity.displayMessage(message);
 						} else {
 							// start new chat activity
 							Intent intent = new Intent(mainActivity,
 									ChatActivity.class);
-							intent.putExtra(USER_ID, from);							
-							intent.putExtra(MESSAGE_FROM,
-									StringUtils.parseName(message.getFrom()));
+							intent.putExtra(USER_ID, entry.getUser());
 							intent.putExtra(MESSAGE_BODY, message.getBody());
 							mainActivity.startActivity(intent);
 							// the new activity registered itself
@@ -141,11 +149,11 @@ public class ServerConnection {
 		return statusCallback;
 	}
 
-	public void addActiveChat(String to, ChatActivity activity) {
+	public void addActiveChat(RosterEntry to, ChatActivity activity) {
 		activeChats.put(to, activity);
 	}
 
-	public void removeActiveChat(String to) {
+	public void removeActiveChat(RosterEntry to) {
 		activeChats.remove(to);
 	}
 
@@ -188,6 +196,10 @@ public class ServerConnection {
 		// HttpEntity entity = response.getEntity();
 	}
 
+	static String toSHA1(String convertme) {
+		return ServerConnection.toSHA1(convertme.getBytes());
+	}
+
 	static String toSHA1(byte[] convertme) {
 		MessageDigest md = null;
 		try {
@@ -207,7 +219,7 @@ public class ServerConnection {
 
 	static String getPass(String username, String email) {
 		String pSource = username + "gravity" + email;
-		return toSHA1(pSource.getBytes()).substring(11, 19);
+		return toSHA1(pSource).substring(11, 19);
 	}
 
 	class CreateConnection extends AsyncTask<String, Void, Void> {
@@ -296,9 +308,8 @@ public class ServerConnection {
 											.getGraphObject().getProperty(
 													"email");
 									if (email != null) {
-										String username = toSHA1(
-												email.getBytes()).substring(0,
-												25);
+										String username = toSHA1(email)
+												.substring(0, 25);
 										String password = getPass(username,
 												email);
 
