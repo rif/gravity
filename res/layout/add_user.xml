@@ -22,25 +22,12 @@
         android:hint="@string/user_name"
         android:inputType="textPersonName" />
 
-    <LinearLayout
+    <AutoCompleteTextView
+        android:id="@+id/user_group"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal" >
-
-        <AutoCompleteTextView
-            android:id="@+id/user_group"
-            android:layout_width="0dip"
-            android:layout_height="wrap_content"           
-            android:layout_weight="1"
-            android:ems="10"
-            android:hint="@string/user_group" />
-
-        <Button
-            android:id="@+id/group_new_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/group_new" />
-    </LinearLayout>
+        android:layout_height="wrap_content"        
+        android:ems="10"
+        android:hint="@string/user_group" />
 
     <Button
         android:id="@+id/user_add_button"

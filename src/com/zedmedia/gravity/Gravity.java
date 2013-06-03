@@ -5,8 +5,8 @@ import java.util.Collection;
 
 import org.jivesoftware.smack.Roster;
 import org.jivesoftware.smack.RosterEntry;
+import org.jivesoftware.smack.RosterGroup;
 import org.jivesoftware.smack.RosterListener;
-import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.packet.Presence;
 
 import android.app.Activity;
@@ -17,6 +17,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
@@ -28,15 +29,15 @@ public class Gravity extends Activity implements RosterListener {
 	private ServerConnection serverConnection;
 	private Roster roster;
 	private ListView list;
-	private AddGroupDialog addGroupDialog;
-	private AddUserDialog addUserDialog;
+	private GroupDialog groupDialog;
+	private BuddyDialog buddyDialog;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_roster);
-		addGroupDialog = new AddGroupDialog(this);
-		addUserDialog = new AddUserDialog(this);
+		groupDialog = new GroupDialog(this);
+		buddyDialog = new BuddyDialog(this);
 		serverConnection = ServerConnection.getInstance();
 		serverConnection.init(savedInstanceState, this);
 		list = (ListView) this.findViewById(R.id.buddyList);
@@ -54,11 +55,34 @@ public class Gravity extends Activity implements RosterListener {
 			}
 
 		});
+		list.setOnItemLongClickListener(new OnItemLongClickListener() {
+
+			public boolean onItemLongClick(AdapterView<?> parent, View view,
+					int position, long id) {
+				final RosterEntry entry = (RosterEntry) parent
+						.getItemAtPosition(position);
+				buddyDialog.show();
+				buddyDialog.setRosterEntry(entry);
+				buddyDialog.setId(entry.getUser());
+				buddyDialog.setName(entry.getName());
+				RosterGroup group = null;
+				for (RosterGroup g : entry.getGroups()) {
+					group = g;
+					break;
+				}
+				if (group != null) {
+					buddyDialog.setGroup(group.getName());
+				}				
+
+				return true;
+			}
+		});
+
 		setListAdapter();
 	}
 
 	public void setAddUserGroup(String group) {
-		addUserDialog.setGroup(group);
+		buddyDialog.setGroup(group);
 	}
 
 	public void setRoster(Roster r) {
@@ -66,7 +90,7 @@ public class Gravity extends Activity implements RosterListener {
 		roster.setSubscriptionMode(Roster.SubscriptionMode.accept_all);
 		roster.addRosterListener(this);
 
-		//clearAllRosterEntries();
+		// clearAllRosterEntries();
 		Log.i(TAG, "Getting roster members: " + roster.getEntries().size());
 		Collection<RosterEntry> entries = roster.getEntries();
 		buddies.clear();
@@ -89,18 +113,18 @@ public class Gravity extends Activity implements RosterListener {
 		}
 	}
 
-//	private void clearAllRosterEntries() {
-//		Collection<RosterEntry> entries = roster.getEntries();
-//		buddies.clear();
-//		for (RosterEntry entry : entries) {
-//			try {
-//				roster.removeEntry(entry);
-//			} catch (XMPPException e) {
-//				Log.e(TAG, "Could not remove roster entry: " + e.getMessage());
-//			}
-//		}
-//
-//	}
+	// private void clearAllRosterEntries() {
+	// Collection<RosterEntry> entries = roster.getEntries();
+	// buddies.clear();
+	// for (RosterEntry entry : entries) {
+	// try {
+	// roster.removeEntry(entry);
+	// } catch (XMPPException e) {
+	// Log.e(TAG, "Could not remove roster entry: " + e.getMessage());
+	// }
+	// }
+	//
+	// }
 
 	private void setListAdapter() {
 		ArrayAdapter<RosterEntry> adapter = new ArrayAdapter<RosterEntry>(this,
@@ -150,10 +174,10 @@ public class Gravity extends Activity implements RosterListener {
 			finish();
 			return true;
 		case R.id.add_user:
-			addUserDialog.show();
+			buddyDialog.show();
 			return true;
 		case R.id.add_group:
-			addGroupDialog.show();
+			groupDialog.show();
 			return true;
 		default:
 			return super.onOptionsItemSelected(item);

@@ -2,17 +2,16 @@ package com.zedmedia.gravity;
 
 import org.jivesoftware.smack.Roster;
 
-import android.app.Activity;
 import android.app.Dialog;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
-public class AddGroupDialog extends Dialog implements
+public class GroupDialog extends Dialog implements
 		android.view.View.OnClickListener {
 	private Gravity chatActivity;
 
-	public AddGroupDialog(Gravity gravity) {
+	public GroupDialog(Gravity gravity) {
 		super(gravity);		
 		chatActivity = gravity;
 	}
