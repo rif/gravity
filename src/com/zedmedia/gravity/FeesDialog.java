@@ -44,10 +44,6 @@ public class FeesDialog extends Dialog {
 		for (RosterGroup rg : roster.getGroups()) {
 			groups.add(new GroupInfo(rg));
 		}
-		setListAdapter();
-	}
-
-	private void setListAdapter() {
 		ArrayAdapter<GroupInfo> adapter = new ArrayAdapter<GroupInfo>(
 				mainActivity, R.layout.list, groups);
 		list.setAdapter(adapter);
