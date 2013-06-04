@@ -22,6 +22,7 @@ public class ChatActivity extends Activity {
 	private RosterEntry recipient;
 	private EditText text;
 	private ListView list;
+	private ArrayAdapter<String> listAdapter;
 	private ServerConnection serverConnection;
 
 	/** Called when the activity is first created. */
@@ -36,7 +37,9 @@ public class ChatActivity extends Activity {
 
 		text = (EditText) this.findViewById(R.id.message);
 		list = (ListView) this.findViewById(R.id.messageList);
-		// setListAdapter();
+		listAdapter = new ArrayAdapter<String>(this,
+				R.layout.list, messages);
+		list.setAdapter(listAdapter);
 		serverConnection = ServerConnection.getInstance();
 		String address = getIntent().getStringExtra(ServerConnection.USER_ID);
 		recipient = serverConnection.getConnection().getRoster()
@@ -72,7 +75,7 @@ public class ChatActivity extends Activity {
 		messages.add(body);
 		handler.post(new Runnable() {
 			public void run() {
-				setListAdapter();
+				listAdapter.notifyDataSetChanged();
 			}
 		});
 	}
@@ -94,13 +97,7 @@ public class ChatActivity extends Activity {
 		serverConnection.getConnection().sendPacket(msg);
 		messages.add(serverConnection.getConnection().getAccountManager().getAccountAttribute("name") + ":");
 		messages.add(message);
-		setListAdapter();
-	}
-
-	private void setListAdapter() {
-		ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
-				R.layout.list, messages);
-		list.setAdapter(adapter);
+		listAdapter.notifyDataSetChanged();
 	}
 
 }

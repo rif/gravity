@@ -26,6 +26,7 @@ import com.facebook.Session;
 public class Gravity extends Activity implements RosterListener {
 	private static final String TAG = "[GRAVITY]";
 	private ArrayList<RosterEntry> buddies = new ArrayList<RosterEntry>();
+	private BuddyListAdapter listAdapter;
 	private ServerConnection serverConnection;
 	private Roster roster;
 	private ListView list;
@@ -40,6 +41,7 @@ public class Gravity extends Activity implements RosterListener {
 		groupDialog = new GroupDialog(this);
 		buddyDialog = new BuddyDialog(this);
 		feesDialog = new FeesDialog(this);
+		listAdapter = new BuddyListAdapter(this, R.layout.list, buddies);
 		serverConnection = ServerConnection.getInstance();
 		// try to establish connection
 		SharedPreferences sharedPref = this
@@ -84,8 +86,7 @@ public class Gravity extends Activity implements RosterListener {
 				return true;
 			}
 		});
-
-		setListAdapter();
+		list.setAdapter(listAdapter);
 	}
 
 	public void setRoster(Roster r) {
@@ -94,7 +95,10 @@ public class Gravity extends Activity implements RosterListener {
 		roster.addRosterListener(this);
 
 		// clearAllRosterEntries();
-		Log.i(TAG, "Getting roster members: " + roster.getEntries().size());
+		refreshRoster();
+	}
+
+	private void refreshRoster() {
 		Collection<RosterEntry> entries = roster.getEntries();
 		buddies.clear();
 		for (RosterEntry entry : entries) {
@@ -109,7 +113,7 @@ public class Gravity extends Activity implements RosterListener {
 		if (buddies.size() > 0) {
 			runOnUiThread(new Runnable() {
 				public void run() {
-					setListAdapter();
+					listAdapter.notifyDataSetChanged();
 				}
 			});
 		}
@@ -127,10 +131,6 @@ public class Gravity extends Activity implements RosterListener {
 	// }
 	//
 	// }
-
-	private void setListAdapter() {
-		list.setAdapter(new BuddyListAdapter(this, R.layout.list, buddies));
-	}
 
 	@Override
 	public void onStart() {
@@ -201,16 +201,18 @@ public class Gravity extends Activity implements RosterListener {
 		for (String address : addresses) {
 			buddies.remove(address);
 		}
-		setListAdapter();
+		listAdapter.notifyDataSetChanged();
 	}
 
 	public void entriesUpdated(Collection<String> addresses) {
 		Log.d(TAG, "entries updated: " + addresses);
+		refreshRoster();
 	}
 
 	public void presenceChanged(Presence presence) {
 		System.out.println("Presence changed: " + presence.getFrom() + " "
 				+ presence);
+		refreshRoster();
 	}
 
 	@Override
@@ -222,6 +224,6 @@ public class Gravity extends Activity implements RosterListener {
 				buddies.add(entry);
 			}
 		}
-		setListAdapter();
+		listAdapter.notifyDataSetChanged();
 	}
 }
