@@ -100,19 +100,15 @@ public class BuddyDialog extends Dialog {
 		editedEntry = re;
 		setTitle("Edit friend");
 		// remove the id edit text
+		userNameText.setText(editedEntry.getName());
+		RosterGroup group = null;
+		for (RosterGroup g : editedEntry.getGroups()) {
+			group = g;
+			break;
+		}
+		if (group != null) {
+			userGroupText.setText(group.getName());
+		}
 		((LinearLayout) userIdText.getParent()).removeView(userIdText);
 	}
-
-	public void setId(String id) {
-		userIdText.setText(id);
-	}
-
-	public void setName(String name) {
-		userNameText.setText(name);
-	}
-
-	public void setGroup(String group) {
-		userGroupText.setText(group);
-	}
-
 }

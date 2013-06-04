@@ -5,7 +5,6 @@ import java.util.Collection;
 
 import org.jivesoftware.smack.Roster;
 import org.jivesoftware.smack.RosterEntry;
-import org.jivesoftware.smack.RosterGroup;
 import org.jivesoftware.smack.RosterListener;
 import org.jivesoftware.smack.packet.Presence;
 
@@ -83,26 +82,11 @@ public class Gravity extends Activity implements RosterListener {
 						.getItemAtPosition(position);
 				buddyDialog.show();
 				buddyDialog.setRosterEntry(entry);
-				buddyDialog.setId(entry.getUser());
-				buddyDialog.setName(entry.getName());
-				RosterGroup group = null;
-				for (RosterGroup g : entry.getGroups()) {
-					group = g;
-					break;
-				}
-				if (group != null) {
-					buddyDialog.setGroup(group.getName());
-				}
-
 				return true;
 			}
 		});
 
 		setListAdapter();
-	}
-
-	public void setAddUserGroup(String group) {
-		buddyDialog.setGroup(group);
 	}
 
 	public void setRoster(Roster r) {
