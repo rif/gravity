@@ -226,4 +226,8 @@ public class Gravity extends Activity implements RosterListener {
 		}
 		listAdapter.notifyDataSetChanged();
 	}
+	
+	public void refreshFeeList(){
+		feesDialog.refreshList();
+	}
 }

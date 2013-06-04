@@ -65,9 +65,11 @@ public class BuddyDialog extends Dialog {
 						oldGroup = rg;
 						break;
 					}
-					if (!group.equals(oldGroup.getName())) {
+					if (oldGroup == null || !group.equals(oldGroup.getName())) {
 						try {
-							oldGroup.removeEntry(editedEntry);
+							if (oldGroup != null) {
+								oldGroup.removeEntry(editedEntry);
+							}
 							RosterGroup newGroup = roster.getGroup(group);
 							if (newGroup == null) {
 								newGroup = roster.createGroup(group);

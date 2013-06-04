@@ -18,14 +18,18 @@ public class GroupInfo {
 	}
 
 	public GroupInfo(RosterGroup rg) {
+		this(rg.getName());
+	}
+	
+	public GroupInfo(String json) {
 		Gson gson = new Gson();
 		try {
-			GroupInfo gi = gson.fromJson(rg.getName(), GroupInfo.class);
+			GroupInfo gi = gson.fromJson(json, GroupInfo.class);
 			setName(gi.getName());
 			setFee(gi.getFee());
 		} catch (JsonSyntaxException jse) {
-			setName(rg.getName());
-			setFee(fee);
+			setName(json);
+			setFee(0);
 		}
 	}
 

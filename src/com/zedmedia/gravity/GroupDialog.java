@@ -16,9 +16,11 @@ public class GroupDialog extends Dialog {
 	private EditText groupNameText;
 	private EditText groupFeeText;
 	private GroupInfo groupInfo;
+	private Gravity mainActivity;
 
 	public GroupDialog(Gravity gravity) {
 		super(gravity);
+		mainActivity = gravity;
 	}
 
 	@Override
@@ -45,12 +47,19 @@ public class GroupDialog extends Dialog {
 				if (groupInfo == null) {
 					roster.createGroup(groupString);
 				} else {
-					Log.d(TAG, "Editing group: "+ groupInfo.getJson() + " with new name: " + groupString);
+					Log.d(TAG, "Editing group: " + groupInfo.getJson()
+							+ " with new name: " + groupString);
 					RosterGroup rg = roster.getGroup(groupInfo.getJson());
-					rg.setName(groupString);
-					groupInfo.setName(name);
-					groupInfo.setFee(fee);
+					if (rg == null) {
+						rg = roster.getGroup(groupInfo.getName());
+					}
+					if (rg != null) {
+						rg.setName(groupString);
+						groupInfo.setName(name);
+						groupInfo.setFee(fee);
+					}
 				}
+				mainActivity.refreshFeeList();
 				dismiss();
 
 			}

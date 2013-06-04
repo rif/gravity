@@ -15,6 +15,8 @@ public class FeesDialog extends Dialog {
 	private ArrayList<GroupInfo> groups = new ArrayList<GroupInfo>();
 	private ListView list;
 	private Gravity mainActivity;
+	private ArrayAdapter<GroupInfo> listAdapter;
+	private Roster roster;
 
 	public FeesDialog(Gravity gravity) {
 		super(gravity);
@@ -38,15 +40,21 @@ public class FeesDialog extends Dialog {
 			}
 
 		});
-		Roster roster = ServerConnection.getInstance().getConnection()
-				.getRoster();
-		groups.clear();
-		for (RosterGroup rg : roster.getGroups()) {
-			groups.add(new GroupInfo(rg));
-		}
-		ArrayAdapter<GroupInfo> adapter = new ArrayAdapter<GroupInfo>(
-				mainActivity, R.layout.list, groups);
-		list.setAdapter(adapter);
+		roster = ServerConnection.getInstance().getConnection().getRoster();
+
+		listAdapter = new ArrayAdapter<GroupInfo>(mainActivity, R.layout.list,
+				groups);
+		list.setAdapter(listAdapter);
+		refreshList();
 	}
 
+	public void refreshList() {
+		if (roster != null) {
+			groups.clear();
+			for (RosterGroup rg : roster.getGroups()) {
+				groups.add(new GroupInfo(rg));
+			}
+			listAdapter.notifyDataSetChanged();
+		}
+	}
 }
