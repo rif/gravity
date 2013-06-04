@@ -70,6 +70,7 @@ public class ServerConnection {
 
 	private ServerConnection() {
 		httpclient = new DefaultHttpClient();
+		activeChats = new HashMap<RosterEntry, ChatActivity>();
 	}
 
 	public static ServerConnection getInstance() {
@@ -107,8 +108,7 @@ public class ServerConnection {
 							statusCallback));
 		} else {
 			Session.openActiveSession(mainActivity, true, statusCallback);
-		}
-		activeChats = new HashMap<RosterEntry, ChatActivity>();
+		}		
 	}
 
 	// Called by settings when connection is established

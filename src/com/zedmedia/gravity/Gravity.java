@@ -19,7 +19,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemLongClickListener;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import com.facebook.Session;
@@ -110,7 +109,6 @@ public class Gravity extends Activity implements RosterListener {
 		if (buddies.size() > 0) {
 			runOnUiThread(new Runnable() {
 				public void run() {
-
 					setListAdapter();
 				}
 			});
@@ -131,9 +129,7 @@ public class Gravity extends Activity implements RosterListener {
 	// }
 
 	private void setListAdapter() {
-		ArrayAdapter<RosterEntry> adapter = new ArrayAdapter<RosterEntry>(this,
-				R.layout.list, buddies);
-		list.setAdapter(adapter);
+		list.setAdapter(new BuddyListAdapter(this, R.layout.list, buddies));
 	}
 
 	@Override

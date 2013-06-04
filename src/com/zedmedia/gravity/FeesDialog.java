@@ -11,9 +11,6 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonSyntaxException;
-
 public class FeesDialog extends Dialog {
 	private ArrayList<GroupInfo> groups = new ArrayList<GroupInfo>();
 	private ListView list;
@@ -44,15 +41,8 @@ public class FeesDialog extends Dialog {
 		Roster roster = ServerConnection.getInstance().getConnection()
 				.getRoster();
 		groups.clear();
-		Gson gson = new Gson();
 		for (RosterGroup rg : roster.getGroups()) {
-			GroupInfo gi = null;
-			try {
-				gi = gson.fromJson(rg.getName(), GroupInfo.class);
-			} catch (JsonSyntaxException jse) {
-				gi = new GroupInfo(rg.getName(), 0);
-			}
-			groups.add(gi);
+			groups.add(new GroupInfo(rg));
 		}
 		setListAdapter();
 	}
