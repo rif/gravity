@@ -1,25 +1,12 @@
 package com.zedmedia.gravity;
 
-import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Formatter;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.util.EntityUtils;
 import org.jivesoftware.smack.AccountManager;
 import org.jivesoftware.smack.ConnectionConfiguration;
 import org.jivesoftware.smack.PacketListener;
@@ -61,7 +48,6 @@ public class ServerConnection {
 	public static final int PORT = 5222;
 	public static final String SERVICE = "";
 	public static final String TAG = "[Gravity AUTH]";
-	private HttpClient httpclient;
 	private XMPPConnection connection;
 	private Session.StatusCallback statusCallback = new SessionStatusCallback();
 	private Gravity mainActivity;
@@ -69,7 +55,6 @@ public class ServerConnection {
 	private static ServerConnection serverConnection;
 
 	private ServerConnection() {
-		httpclient = new DefaultHttpClient();
 		activeChats = new HashMap<RosterEntry, ChatActivity>();
 	}
 
@@ -79,13 +64,13 @@ public class ServerConnection {
 		}
 		return serverConnection;
 	}
-	
-	public void setMainActivity(Gravity gravity){
+
+	public void setMainActivity(Gravity gravity) {
 		mainActivity = gravity;
 	}
 
 	public void init(Bundle savedInstanceState, Gravity main) {
-		Settings.addLoggingBehavior(LoggingBehavior.INCLUDE_ACCESS_TOKENS);		
+		Settings.addLoggingBehavior(LoggingBehavior.INCLUDE_ACCESS_TOKENS);
 		Session session = Session.getActiveSession();
 		if (session == null) {
 			if (savedInstanceState != null) {
@@ -108,13 +93,14 @@ public class ServerConnection {
 							statusCallback));
 		} else {
 			Session.openActiveSession(mainActivity, true, statusCallback);
-		}		
+		}
 	}
 
 	// Called by settings when connection is established
 	public void setConnection(XMPPConnection connection) {
 		this.connection = connection;
 		if (connection != null) {
+			mainActivity.setRoster(connection.getRoster());
 			// Packet listener to get messages sent to logged in user
 			PacketFilter filter = new MessageTypeFilter(Message.Type.chat);
 			connection.addPacketListener(new PacketListener() {
@@ -165,45 +151,6 @@ public class ServerConnection {
 
 	public void removeActiveChat(RosterEntry to) {
 		activeChats.remove(to);
-	}
-
-	public String getCredit() throws IOException {
-		String result = "";
-		HttpGet httpGet = new HttpGet(
-				"http://dev.seeme.com:6018/credit/api/get_credit/");
-		HttpResponse response = httpclient.execute(httpGet);
-		// System.out.println(response.getStatusLine());
-		HttpEntity entity = response.getEntity();
-		result = EntityUtils.toString(entity);
-		return result;
-	}
-
-	public void login(String username, String email, String password)
-			throws IOException {
-		HttpPost httpPost = new HttpPost(
-				"http://dev.seeme.com:6018/credit/api/login_user/");
-		List<NameValuePair> nvps = new ArrayList<NameValuePair>();
-		nvps.add(new BasicNameValuePair("username", username));
-		nvps.add(new BasicNameValuePair("email", email));
-		nvps.add(new BasicNameValuePair("password", getPass(username, email)));
-		httpPost.setEntity(new UrlEncodedFormEntity(nvps));
-		httpclient.execute(httpPost);
-
-		// System.out.println(response.getStatusLine());
-		// HttpEntity entity = response.getEntity();
-	}
-
-	public void createTransaction() throws IOException {
-		HttpPost httpPost = new HttpPost(
-				"http://dev.seeme.com:6018/credit/api/create_transaction/");
-		List<NameValuePair> nvps1 = new ArrayList<NameValuePair>();
-		nvps1.add(new BasicNameValuePair("amount", "3"));
-		nvps1.add(new BasicNameValuePair("description", "from java"));
-		nvps1.add(new BasicNameValuePair("transaction_class", "award"));
-		httpPost.setEntity(new UrlEncodedFormEntity(nvps1));
-		httpclient.execute(httpPost);
-		// System.out.println(response.getStatusLine());
-		// HttpEntity entity = response.getEntity();
 	}
 
 	static String toSHA1(String convertme) {
@@ -283,15 +230,6 @@ public class ServerConnection {
 					Log.e(TAG, "Login failed: " + ex2.getMessage());
 					setConnection(null);
 				}
-			}
-			if (getConnection() != null) {
-				try {
-					getInstance().login(username, email, password);
-
-				} catch (IOException e) {
-					Log.e(TAG, e.getMessage());
-				}				
-				mainActivity.setRoster(connection.getRoster());
 			}
 			return null;
 		}
