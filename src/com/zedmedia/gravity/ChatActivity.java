@@ -37,20 +37,19 @@ public class ChatActivity extends Activity {
 
 		text = (EditText) this.findViewById(R.id.message);
 		list = (ListView) this.findViewById(R.id.messageList);
-		listAdapter = new ArrayAdapter<String>(this,
-				R.layout.list, messages);
+		listAdapter = new ArrayAdapter<String>(this, R.layout.list, messages);
 		list.setAdapter(listAdapter);
 		serverConnection = ServerConnection.getInstance();
 		String address = getIntent().getStringExtra(ServerConnection.USER_ID);
 		recipient = serverConnection.getConnection().getRoster()
 				.getEntry(address);
 		serverConnection.addActiveChat(recipient, this);
-		String body = getIntent().getStringExtra(ServerConnection.MESSAGE_BODY);		
+		String body = getIntent().getStringExtra(ServerConnection.MESSAGE_BODY);
 		if (body != null) {
 			displayMessage(getRecipientName(recipient), body);
 		}
 
-		setTitle(getRecipientName(null));		
+		setTitle(getRecipientName(null));
 	}
 
 	public String getRecipientName(RosterEntry entry) {
@@ -94,10 +93,12 @@ public class ChatActivity extends Activity {
 		Message msg = new Message(recipient.getUser(), Message.Type.chat);
 		Log.d(TAG, "Recipient: " + recipient);
 		msg.setBody(message);
+		msg.addExtension(new GravityExtension(1.4));
 		serverConnection.getConnection().sendPacket(msg);
-		messages.add(serverConnection.getConnection().getAccountManager().getAccountAttribute("name") + ":");
+		messages.add(serverConnection.getConnection().getAccountManager()
+				.getAccountAttribute("name")
+				+ ":");
 		messages.add(message);
 		listAdapter.notifyDataSetChanged();
 	}
-
 }

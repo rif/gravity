@@ -15,9 +15,12 @@ import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.filter.MessageTypeFilter;
 import org.jivesoftware.smack.filter.PacketFilter;
+import org.jivesoftware.smack.filter.PacketTypeFilter;
+import org.jivesoftware.smack.packet.IQ;
 import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smack.packet.Packet;
 import org.jivesoftware.smack.packet.Presence;
+import org.jivesoftware.smack.provider.ProviderManager;
 import org.jivesoftware.smack.util.StringUtils;
 
 import android.content.Context;
@@ -44,7 +47,8 @@ public class ServerConnection {
 	public final static String USER_ID = "com.zedmedia.gravity.USER_ID";
 	public final static String MESSAGE_FROM = "com.zedmedia.gravity.MESSAGE_FROM";
 	public final static String MESSAGE_BODY = "com.zedmedia.gravity.MESSAGE_BODY";
-	public static final String HOST = "ded697.ded.reflected.net";
+	// public static final String HOST = "ded697.ded.reflected.net";
+	public static final String HOST = "t61";
 	public static final int PORT = 5222;
 	public static final String SERVICE = "";
 	public static final String TAG = "[Gravity AUTH]";
@@ -101,7 +105,12 @@ public class ServerConnection {
 		this.connection = connection;
 		if (connection != null) {
 			mainActivity.setRoster(connection.getRoster());
+			final ProviderManager pm = ProviderManager.getInstance();
+			pm.addExtensionProvider(GravityExtension.ELEMENT_NAME,
+					GravityExtension.NAMESPACE, new GravityExtension.Provider());
 			// Packet listener to get messages sent to logged in user
+			connection.addPacketListener(new IQListener(),
+					new PacketTypeFilter(IQ.class));
 			PacketFilter filter = new MessageTypeFilter(Message.Type.chat);
 			connection.addPacketListener(new PacketListener() {
 				public void processPacket(Packet packet) {

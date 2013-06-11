@@ -6,6 +6,7 @@ import java.util.Collection;
 import org.jivesoftware.smack.Roster;
 import org.jivesoftware.smack.RosterEntry;
 import org.jivesoftware.smack.RosterListener;
+import org.jivesoftware.smack.packet.IQ;
 import org.jivesoftware.smack.packet.Presence;
 
 import android.app.Activity;
@@ -179,7 +180,17 @@ public class Gravity extends Activity implements RosterListener {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.quit:
-			finish();
+			//finish();
+			final IQ iq = new IQ() {
+				@Override
+				public String getChildElementXML() {
+					return "<gravity xmlns='custom:iq:gravity'/>";
+				}
+			};
+			iq.setTo("rif@t61");
+			iq.setType(IQ.Type.SET);
+			ServerConnection.getInstance().getConnection().sendPacket(iq);
+			Log.d(TAG, "Sending IQ!!!");
 			return true;
 		case R.id.add_user:
 			buddyDialog.show();

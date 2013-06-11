@@ -6,12 +6,14 @@ import org.jivesoftware.smack.Roster;
 import org.jivesoftware.smack.RosterGroup;
 
 import android.app.Dialog;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 public class FeesDialog extends Dialog {
+	private static final String TAG = "[gravity fees]";
 	private ArrayList<GroupInfo> groups = new ArrayList<GroupInfo>();
 	private ListView list;
 	private Gravity mainActivity;
@@ -49,6 +51,7 @@ public class FeesDialog extends Dialog {
 	}
 
 	public void refreshList() {
+		Log.d(TAG,"Refreshing fees: " + roster );
 		if (roster != null) {
 			groups.clear();
 			for (RosterGroup rg : roster.getGroups()) {
