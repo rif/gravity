@@ -2,7 +2,6 @@ package com.zedmedia.gravity;
 
 import java.util.List;
 
-import org.jivesoftware.smack.RosterEntry;
 import org.jivesoftware.smack.RosterGroup;
 
 import android.content.Context;
@@ -12,11 +11,11 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
-public class BuddyListAdapter extends ArrayAdapter<RosterEntry> {
-	private List<RosterEntry> entries;
+public class BuddyListAdapter extends ArrayAdapter<GravityRosterEntry> {
+	private List<GravityRosterEntry> entries;
 
 	public BuddyListAdapter(Context context, int resource,
-			List<RosterEntry> items) {
+			List<GravityRosterEntry> items) {
 
 		super(context, resource, items);
 
@@ -34,21 +33,23 @@ public class BuddyListAdapter extends ArrayAdapter<RosterEntry> {
 			v = vi.inflate(R.layout.roster_list, null);
 		}
 
-		RosterEntry entry = entries.get(position);
+		GravityRosterEntry entry = entries.get(position);
 		if (entry != null) {
 			TextView statusText = (TextView) v.findViewById(R.id.status);
 			TextView nameText = (TextView) v.findViewById(R.id.name);
 			TextView groupText = (TextView) v.findViewById(R.id.group);
 			if (statusText != null) {
-				if (entry.getStatus() != null){
-					statusText.setText(entry.getStatus().toString());
-				}				
+				if (entry.getRosterEntry().getStatus() != null) {
+					statusText.setText(entry.getRosterEntry().getStatus()
+							.toString());
+				}
+				statusText.setText("" + entry.getFee());
 				String name = entry.getName();
 				if (name == null || name.trim().equals("")) {
-					name = entry.getUser();
+					name = entry.getRosterEntry().getUser();
 				}
 				nameText.setText(name);
-				for (RosterGroup rg : entry.getGroups()) {
+				for (RosterGroup rg : entry.getRosterEntry().getGroups()) {
 					GroupInfo gi = new GroupInfo(rg);
 					groupText.setText(gi.getName());
 					break;

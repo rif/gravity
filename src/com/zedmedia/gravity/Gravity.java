@@ -26,7 +26,7 @@ import com.facebook.Session;
 
 public class Gravity extends Activity implements RosterListener {
 	private static final String TAG = "[GRAVITY]";
-	private ArrayList<RosterEntry> buddies = new ArrayList<RosterEntry>();
+	private ArrayList<GravityRosterEntry> buddies = new ArrayList<GravityRosterEntry>();
 	private BuddyListAdapter listAdapter;
 	private ServerConnection serverConnection;
 	private Roster roster;
@@ -67,11 +67,11 @@ public class Gravity extends Activity implements RosterListener {
 			@Override
 			public void onItemClick(AdapterView<?> parent, final View view,
 					int position, long id) {
-				final RosterEntry recipientEntry = (RosterEntry) parent
+				final GravityRosterEntry recipientEntry = (GravityRosterEntry) parent
 						.getItemAtPosition(position);
 				Intent intent = new Intent(Gravity.this, ChatActivity.class);
 				intent.putExtra(ServerConnection.USER_ID,
-						recipientEntry.getUser());
+						recipientEntry.getRosterEntry().getUser());
 				startActivity(intent);
 			}
 
@@ -108,7 +108,7 @@ public class Gravity extends Activity implements RosterListener {
 				if (name == null || name.trim().equals("")) {
 					name = entry.getUser();
 				}
-				buddies.add(entry);
+				buddies.add(new GravityRosterEntry(entry));
 			}
 		}
 		if (buddies.size() > 0) {
@@ -232,7 +232,7 @@ public class Gravity extends Activity implements RosterListener {
 		for (String address : addresses) {
 			RosterEntry entry = roster.getEntry(address);
 			if (entry != null) {
-				buddies.add(entry);
+				buddies.add(new GravityRosterEntry(entry));
 			}
 		}
 		listAdapter.notifyDataSetChanged();

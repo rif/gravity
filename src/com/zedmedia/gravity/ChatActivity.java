@@ -56,7 +56,8 @@ public class ChatActivity extends Activity {
 		if (entry == null) {
 			entry = this.recipient;
 		}
-		String title = recipient.getName();
+		GravityRosterEntry re = new GravityRosterEntry(recipient);
+		String title = re.getName();
 		if (title == null || title.trim().equals("")) {
 			title = entry.getUser();
 		}

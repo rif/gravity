@@ -23,7 +23,9 @@ import org.jivesoftware.smack.packet.Presence;
 import org.jivesoftware.smack.provider.ProviderManager;
 import org.jivesoftware.smack.util.StringUtils;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
@@ -239,6 +241,24 @@ public class ServerConnection {
 					Log.e(TAG, "Login failed: " + ex2.getMessage());
 					setConnection(null);
 				}
+			} catch (IllegalStateException e) {
+				Log.e(TAG, "Server not available!");
+				final AlertDialog.Builder builder = new AlertDialog.Builder(
+						mainActivity);
+				builder.setMessage("Chat server not accessible!").setTitle("Connection error");
+				builder.setNegativeButton(R.string.action_quit, new DialogInterface.OnClickListener() {
+			           public void onClick(DialogInterface dialog, int id) {
+			               mainActivity.finish();
+			           }
+			       });
+				mainActivity.runOnUiThread(new Runnable() {
+					@Override
+					public void run() {
+						AlertDialog dialog = builder.create();
+						dialog.show();
+					}
+				});
+
 			}
 			return null;
 		}
