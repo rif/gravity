@@ -12,17 +12,20 @@
     <string name="port">Port</string>
     <string name="service">Service</string>
     <string name="userid">User</string>
-    <string name="passsword">Password</string>
+    <string name="password">Password</string>
     <string name="save_settings">Save Settings</string>
     <string name="connecting">Connecting</string>
     <string name="app_id">145090645679404</string>
     <string name="group_name">Group name</string>
     <string name="group_fee">Group fee</string>
     <string name="group_add">Add group</string>
+    <string name="logout">Logout</string>
     <string name="user_id">User email or phone#</string>
     <string name="user_name">Friend name or alias</string>
     <string name="user_group">Friend group</string>
     <string name="user_add">Add friend</string>
     <string name="edit_fees">Edit fees</string>
+    <string name="last_name">First Name</string>
+    <string name="first_name">Last Name</string>
 
 </resources>

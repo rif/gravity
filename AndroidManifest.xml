@@ -48,6 +48,11 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="Gravity" />
         </activity>
+        <activity
+            android:name="com.zedmedia.gravity.RegisterActivity"
+            android:label="@string/title_activity_register"
+            android:windowSoftInputMode="adjustResize|stateVisible" >
+        </activity>
     </application>
 
 </manifest>

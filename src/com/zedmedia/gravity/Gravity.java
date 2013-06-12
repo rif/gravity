@@ -6,6 +6,7 @@ import java.util.Collection;
 import org.jivesoftware.smack.Roster;
 import org.jivesoftware.smack.RosterEntry;
 import org.jivesoftware.smack.RosterListener;
+import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.packet.IQ;
 import org.jivesoftware.smack.packet.Presence;
 
@@ -13,6 +14,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -47,20 +49,10 @@ public class Gravity extends Activity implements RosterListener {
 		// try to establish connection
 		SharedPreferences sharedPref = this
 				.getPreferences(Context.MODE_PRIVATE);
-		String email = sharedPref.getString(ServerConnection.EMAIL, "");
 		String username = sharedPref.getString(ServerConnection.USER_NAME, "");
-		String firstName = sharedPref
-				.getString(ServerConnection.FIRST_NAME, "");
-		String lastName = sharedPref.getString(ServerConnection.LAST_NAME, "");
 		String password = sharedPref.getString(ServerConnection.PASS, "");
 		serverConnection.setMainActivity(this);
-		if (!username.equals("") && !password.equals("")) {
-			serverConnection.new CreateConnection().execute(email, username,
-					firstName, lastName, password);
-
-		} else {
-			serverConnection.init(savedInstanceState, this);
-		}
+		new XMPPConnect().execute(username, password);
 		list = (ListView) this.findViewById(R.id.buddyList);
 		list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
@@ -70,8 +62,8 @@ public class Gravity extends Activity implements RosterListener {
 				final GravityRosterEntry recipientEntry = (GravityRosterEntry) parent
 						.getItemAtPosition(position);
 				Intent intent = new Intent(Gravity.this, ChatActivity.class);
-				intent.putExtra(ServerConnection.USER_ID,
-						recipientEntry.getRosterEntry().getUser());
+				intent.putExtra(ServerConnection.USER_ID, recipientEntry
+						.getRosterEntry().getUser());
 				startActivity(intent);
 			}
 
@@ -180,7 +172,7 @@ public class Gravity extends Activity implements RosterListener {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.quit:
-			//finish();
+			// finish();
 			final IQ iq = new IQ() {
 				@Override
 				public String getChildElementXML() {
@@ -191,6 +183,10 @@ public class Gravity extends Activity implements RosterListener {
 			iq.setType(IQ.Type.SET);
 			ServerConnection.getInstance().getConnection().sendPacket(iq);
 			Log.d(TAG, "Sending IQ!!!");
+			return true;
+		case R.id.logout:
+			ServerConnection.getInstance().logout();
+			startActivity(new Intent(Gravity.this, LoginActivity.class));
 			return true;
 		case R.id.add_user:
 			buddyDialog.show();
@@ -237,8 +233,31 @@ public class Gravity extends Activity implements RosterListener {
 		}
 		listAdapter.notifyDataSetChanged();
 	}
-	
-	public void refreshFeeList(){
+
+	public void refreshFeeList() {
 		feesDialog.refreshList();
+	}
+
+	public class XMPPConnect extends AsyncTask<String, Void, Boolean> {
+		@Override
+		protected Boolean doInBackground(String... params) {
+			String username = params[0];
+			String password = params[1];
+			try {
+				serverConnection.makeConnetion();
+			} catch (XMPPException e) {
+				return false;
+			}
+			if (!username.equals("") && !password.equals("")) {
+				try {
+					serverConnection.login(username, password);
+				} catch (Exception e) {
+					return false;
+				}
+			} else {
+				startActivity(new Intent(Gravity.this, LoginActivity.class));
+			}
+			return true;
+		}
 	}
 }
