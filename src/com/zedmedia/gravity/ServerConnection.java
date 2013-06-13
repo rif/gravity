@@ -25,7 +25,6 @@ import org.jivesoftware.smack.util.StringUtils;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -38,10 +37,7 @@ import com.facebook.Settings;
 import com.facebook.model.GraphUser;
 
 public class ServerConnection {
-	public final static String EMAIL = "com.zedmedia.gravity.EMAIL";
 	public final static String USER_NAME = "com.zedmedia.gravity.USER_NAME";
-	public final static String FIRST_NAME = "com.zedmedia.gravity.FIRST_NAME";
-	public final static String LAST_NAME = "com.zedmedia.gravity.LAST_NAME";
 	public final static String PASS = "com.zedmedia.gravity.PASS";
 	public final static String USER_ID = "com.zedmedia.gravity.USER_ID";
 	public final static String MESSAGE_FROM = "com.zedmedia.gravity.MESSAGE_FROM";
@@ -121,7 +117,7 @@ public class ServerConnection {
 						String from = StringUtils.parseBareAddress(message
 								.getFrom());
 						RosterEntry entry = getConnection().getRoster()
-								.getEntry(StringUtils.parseBareAddress(from));
+								.getEntry(from);
 						ChatActivity chatActivity = null;
 						if (entry != null) {
 							chatActivity = activeChats.get(entry);
@@ -185,54 +181,72 @@ public class ServerConnection {
 		return result;
 	}
 
-	static String getPass(String username, String email) {
+	public static String getUser(String emailOrNumber) {
+		return toSHA1(emailOrNumber).substring(0, 25);
+	}
+
+	public static String getPass(String username, String email) {
 		String pSource = username + "gravity" + email;
 		return toSHA1(pSource).substring(11, 19);
 	}
 
 	public void login(String username, String password) throws XMPPException {
-		Log.d(TAG, "Logging in: " + username + " : " + password);
-		connection.login(username, password);
+		XMPPConnection conn = getConnection();
+		if (conn != null && conn.isConnected() && !conn.isAuthenticated()) {
+			Log.d(TAG, "Logging in: " + username + " : " + password);
+			connection.login(username, password);
 
-		// Set status to online / available
-		Presence presence = new Presence(Presence.Type.available);
-		connection.sendPacket(presence);
-		setup();
-		Log.i(TAG, "User login successful: " + username);
+			// Set status to online / available
+			Presence presence = new Presence(Presence.Type.available);
+			connection.sendPacket(presence);
+			saveCredentials(username, password);
+			setup();
+			Log.i(TAG, "User login successful: " + username);
+		}
 	}
 
 	public void register(String username, String first, String last,
 			String email, String password) throws XMPPException {
-		AccountManager accountManager = new AccountManager(connection);
-		Map<String, String> attributes = new HashMap<String, String>();
-		attributes.put("name", first + " " + last);
-		attributes.put("first", first);
-		attributes.put("last", last);
-		attributes.put("email", email);
-		accountManager.createAccount(username, password, attributes);
-		accountManager.getAccountAttributes();
+		XMPPConnection conn = getConnection();
+		if (conn != null && conn.isConnected() && !conn.isAuthenticated()) {
+			AccountManager accountManager = new AccountManager(connection);
+			Map<String, String> attributes = new HashMap<String, String>();
+			attributes.put("name", first + " " + last);
+			attributes.put("first", first);
+			attributes.put("last", last);
+			attributes.put("email", email);
+			accountManager.createAccount(username, password, attributes);
+			accountManager.getAccountAttributes();
+		}
 	}
 
 	public void makeConnetion() throws XMPPException {
-		ConnectionConfiguration connectionConfig = new ConnectionConfiguration(
-				HOST, PORT, SERVICE);
-		XMPPConnection connection = new XMPPConnection(connectionConfig);
-		connection.connect();
-		setConnection(connection);
+		XMPPConnection conn = getConnection();
+		if (conn == null || !conn.isConnected()) {
+			ConnectionConfiguration connectionConfig = new ConnectionConfiguration(
+					HOST, PORT, SERVICE);
+			XMPPConnection connection = new XMPPConnection(connectionConfig);
+			connection.connect();
+			setConnection(connection);
+		}
 	}
 
 	public boolean loginOrRegister(String email, String username, String first,
 			String last, String password) {
-		try {
-			login(username, password);
-
-		} catch (XMPPException ex1) {
+		XMPPConnection conn = getConnection();
+		if (conn != null && conn.isConnected() && !conn.isAuthenticated()) {
 			try {
-				register(username, first, last, email, password);
 				login(username, password);
-			} catch (XMPPException ex2) {
-				setConnection(null);
-				return false;
+			} catch (XMPPException ex1) {
+				Log.e(TAG, ex1.getMessage());
+				try {
+					register(username, first, last, email, password);
+					login(username, password);
+				} catch (XMPPException ex2) {
+					Log.e(TAG, ex2.getMessage());
+					setConnection(null);
+					return false;
+				}
 			}
 		}
 		return true;
@@ -259,36 +273,25 @@ public class ServerConnection {
 											.getGraphObject().getProperty(
 													"email");
 									if (email != null) {
-										String username = toSHA1(email)
-												.substring(0, 25);
+										String username = getUser(email);
 										String password = getPass(username,
 												email);
 
-										if (loginOrRegister(email, username,
+										loginOrRegister(email, username,
 												user.getFirstName(),
-												user.getLastName(), password)) {
-											// save credentials
-											SharedPreferences sharedPref = mainActivity
-													.getPreferences(Context.MODE_PRIVATE);
-											SharedPreferences.Editor editor = sharedPref
-													.edit();
-											editor.putString(EMAIL, email);
-											editor.putString(USER_NAME,
-													username);
-											editor.putString(FIRST_NAME,
-													user.getFirstName());
-											editor.putString(LAST_NAME,
-													user.getLastName());
-											editor.putString(PASS, password);
-											editor.commit();
-										}
+												user.getLastName(), password);
 									}
 								}
 							}
 						});
 			}
 		}
+	}
 
+	private void saveCredentials(String username, String password) {
+		mainActivity.getPreferences(Context.MODE_PRIVATE).edit()
+				.putString(USER_NAME, username).putString(PASS, password)
+				.commit();
 	}
 
 	public void logout() {
@@ -298,14 +301,6 @@ public class ServerConnection {
 		if (session != null && !session.isClosed()) {
 			session.closeAndClearTokenInformation();
 		}
-		SharedPreferences sharedPref = mainActivity
-				.getPreferences(Context.MODE_PRIVATE);
-		SharedPreferences.Editor editor = sharedPref.edit();
-		editor.putString(EMAIL, "");
-		editor.putString(USER_NAME, "");
-		editor.putString(FIRST_NAME, "");
-		editor.putString(LAST_NAME, "");
-		editor.putString(PASS, "");
-		editor.commit();
+		saveCredentials("", "");
 	}
 }

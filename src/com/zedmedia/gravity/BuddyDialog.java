@@ -44,8 +44,9 @@ public class BuddyDialog extends Dialog {
 			@Override
 			public void onClick(View v) {
 				String userId = userIdText.getText().toString().trim();
-				// userId = ServerConnection.toSHA1(userId);
+				userId = ServerConnection.getUser(userId);
 				userId += "@" + ServerConnection.HOST;
+				Log.d(TAG, "Adding friend: " + userId);
 				if (editedEntry == null) {
 					try {
 						roster.createEntry(userId, userNameText.getText()

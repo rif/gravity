@@ -25,7 +25,7 @@
     <string name="user_group">Friend group</string>
     <string name="user_add">Add friend</string>
     <string name="edit_fees">Edit fees</string>
-    <string name="last_name">First Name</string>
-    <string name="first_name">Last Name</string>
+    <string name="first_name">First Name</string>
+    <string name="last_name">Last Name</string>
 
 </resources>

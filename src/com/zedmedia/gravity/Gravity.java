@@ -38,6 +38,13 @@ public class Gravity extends Activity implements RosterListener {
 	private FeesDialog feesDialog;
 
 	@Override
+	protected void onResume() {
+		super.onResume();
+		connect();
+		refreshRoster();
+	}
+
+	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_roster);
@@ -46,13 +53,7 @@ public class Gravity extends Activity implements RosterListener {
 		feesDialog = new FeesDialog(this);
 		listAdapter = new BuddyListAdapter(this, R.layout.list, buddies);
 		serverConnection = ServerConnection.getInstance();
-		// try to establish connection
-		SharedPreferences sharedPref = this
-				.getPreferences(Context.MODE_PRIVATE);
-		String username = sharedPref.getString(ServerConnection.USER_NAME, "");
-		String password = sharedPref.getString(ServerConnection.PASS, "");
 		serverConnection.setMainActivity(this);
-		new XMPPConnect().execute(username, password);
 		list = (ListView) this.findViewById(R.id.buddyList);
 		list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
@@ -82,6 +83,15 @@ public class Gravity extends Activity implements RosterListener {
 		list.setAdapter(listAdapter);
 	}
 
+	
+	private void connect(){
+		SharedPreferences sharedPref = this
+				.getPreferences(Context.MODE_PRIVATE);
+		String username = sharedPref.getString(ServerConnection.USER_NAME, "");
+		String password = sharedPref.getString(ServerConnection.PASS, "");
+		new XMPPConnect().execute(username, password);
+	}
+	
 	public void setRoster(Roster r) {
 		roster = r;
 		roster.setSubscriptionMode(Roster.SubscriptionMode.accept_all);
@@ -92,6 +102,9 @@ public class Gravity extends Activity implements RosterListener {
 	}
 
 	private void refreshRoster() {
+		if (roster == null) {
+			return;
+		}
 		Collection<RosterEntry> entries = roster.getEntries();
 		buddies.clear();
 		for (RosterEntry entry : entries) {
@@ -183,6 +196,11 @@ public class Gravity extends Activity implements RosterListener {
 			iq.setType(IQ.Type.SET);
 			ServerConnection.getInstance().getConnection().sendPacket(iq);
 			Log.d(TAG, "Sending IQ!!!");
+			Log.d(TAG, ServerConnection.getInstance().getConnection().getAccountManager().getAccountAttribute("name"));
+			for(RosterEntry r:roster.getEntries()) {
+		        Presence presence = roster.getPresence(r.getUser());
+		        Log.d(TAG, presence.toXML());
+		    }
 			return true;
 		case R.id.logout:
 			ServerConnection.getInstance().logout();

@@ -10,6 +10,7 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.View;
@@ -228,16 +229,20 @@ public class RegisterActivity extends Activity {
 	public class UserRegisterTask extends AsyncTask<Void, Void, Boolean> {
 		@Override
 		protected Boolean doInBackground(Void... params) {
-			String username = ServerConnection.toSHA1(mEmail).substring(0, 25);
+			try {
+				serverConnection.makeConnetion();
+			} catch (XMPPException e) {
+				return false;
+			}
+			String username = ServerConnection.getUser(mEmail);
 			try {
 				serverConnection.register(username, mFirstName, mLastName,
 						mEmail, mPassword);
 			} catch (XMPPException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				Log.e("REGISTRATION FAILED!", e.getMessage());
+				return false;
 			}
 
-			// TODO: register the new account here.
 			return true;
 		}
 

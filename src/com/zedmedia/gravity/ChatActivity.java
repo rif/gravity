@@ -2,6 +2,7 @@ package com.zedmedia.gravity;
 
 import java.util.ArrayList;
 
+import org.jivesoftware.smack.Roster;
 import org.jivesoftware.smack.RosterEntry;
 import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smack.util.StringUtils;
@@ -24,6 +25,7 @@ public class ChatActivity extends Activity {
 	private ListView list;
 	private ArrayAdapter<String> listAdapter;
 	private ServerConnection serverConnection;
+	private Roster roster;
 
 	/** Called when the activity is first created. */
 	@Override
@@ -31,15 +33,12 @@ public class ChatActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_chat);
 
-		// StrictMode.ThreadPolicy policy = new
-		// StrictMode.ThreadPolicy.Builder() .permitAll().build();
-		// StrictMode.setThreadPolicy(policy);
-
 		text = (EditText) this.findViewById(R.id.message);
 		list = (ListView) this.findViewById(R.id.messageList);
 		listAdapter = new ArrayAdapter<String>(this, R.layout.list, messages);
 		list.setAdapter(listAdapter);
 		serverConnection = ServerConnection.getInstance();
+		roster = serverConnection.getConnection().getRoster();
 		String address = getIntent().getStringExtra(ServerConnection.USER_ID);
 		recipient = serverConnection.getConnection().getRoster()
 				.getEntry(address);
@@ -59,14 +58,18 @@ public class ChatActivity extends Activity {
 		GravityRosterEntry re = new GravityRosterEntry(recipient);
 		String title = re.getName();
 		if (title == null || title.trim().equals("")) {
-			title = entry.getUser();
+			title = StringUtils.parseName(entry.getUser());
 		}
 		return title;
 	}
 
 	public void displayMessage(Message message) {
-		displayMessage(StringUtils.parseName(message.getFrom()),
-				message.getBody());
+		String name = StringUtils.parseName(message.getFrom());
+		RosterEntry entry = roster.getEntry(message.getFrom());
+		if (entry != null) {
+			name = getRecipientName(entry);
+		}
+		displayMessage(name, message.getBody());
 
 	}
 

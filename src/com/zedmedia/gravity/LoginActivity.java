@@ -244,6 +244,15 @@ public class LoginActivity extends Activity {
 		}
 	}
 
+	@Override
+	public boolean onKeyDown(int keyCode, KeyEvent event) {
+		if (keyCode == KeyEvent.KEYCODE_BACK) {
+			moveTaskToBack(true);
+			return true;
+		}
+		return super.onKeyDown(keyCode, event);
+	}
+
 	/**
 	 * Represents an asynchronous login/registration task used to authenticate
 	 * the user.
@@ -251,12 +260,16 @@ public class LoginActivity extends Activity {
 	public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
 		@Override
 		protected Boolean doInBackground(Void... params) {
-			String username = ServerConnection.toSHA1(mEmail).substring(0, 25);
+			try {
+				serverConnection.makeConnetion();
+			} catch (XMPPException e) {
+				return false;
+			}
+			String username = ServerConnection.getUser(mEmail);
 			try {
 				serverConnection.login(username, mPassword);
 			} catch (XMPPException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				return false;
 			}
 			return true;
 		}
