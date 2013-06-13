@@ -9,6 +9,9 @@ import org.jivesoftware.smack.RosterListener;
 import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.packet.IQ;
 import org.jivesoftware.smack.packet.Presence;
+import org.jivesoftware.smack.provider.ProviderManager;
+import org.jivesoftware.smackx.packet.VCard;
+import org.jivesoftware.smackx.provider.VCardProvider;
 
 import android.app.Activity;
 import android.content.Context;
@@ -83,15 +86,14 @@ public class Gravity extends Activity implements RosterListener {
 		list.setAdapter(listAdapter);
 	}
 
-	
-	private void connect(){
+	private void connect() {
 		SharedPreferences sharedPref = this
 				.getPreferences(Context.MODE_PRIVATE);
 		String username = sharedPref.getString(ServerConnection.USER_NAME, "");
 		String password = sharedPref.getString(ServerConnection.PASS, "");
 		new XMPPConnect().execute(username, password);
 	}
-	
+
 	public void setRoster(Roster r) {
 		roster = r;
 		roster.setSubscriptionMode(Roster.SubscriptionMode.accept_all);
@@ -194,13 +196,23 @@ public class Gravity extends Activity implements RosterListener {
 			};
 			iq.setTo("rif@t61");
 			iq.setType(IQ.Type.SET);
-			ServerConnection.getInstance().getConnection().sendPacket(iq);
+			serverConnection.getConnection().sendPacket(iq);
 			Log.d(TAG, "Sending IQ!!!");
-			Log.d(TAG, ServerConnection.getInstance().getConnection().getAccountManager().getAccountAttribute("name"));
-			for(RosterEntry r:roster.getEntries()) {
-		        Presence presence = roster.getPresence(r.getUser());
-		        Log.d(TAG, presence.toXML());
-		    }
+			Log.d(TAG, serverConnection.getConnection().getAccountManager()
+					.getAccountAttribute("name"));
+			ProviderManager.getInstance().addIQProvider("vCard", "vcard-temp",
+					new VCardProvider());
+			for (RosterEntry r : roster.getEntries()) {
+				Presence presence = roster.getPresence(r.getUser());
+				Log.d(TAG, presence.toXML());
+				VCard vCard = new VCard();
+				try {
+					vCard.load(serverConnection.getConnection(), r.getUser());
+				} catch (XMPPException e) {
+					Log.e(TAG, "Error getting vcard: " + e.getMessage());
+				}
+				Log.d(TAG, "Vcard: " + vCard.toString());
+			}
 			return true;
 		case R.id.logout:
 			ServerConnection.getInstance().logout();
