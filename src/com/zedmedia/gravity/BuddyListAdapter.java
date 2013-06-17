@@ -2,7 +2,9 @@ package com.zedmedia.gravity;
 
 import java.util.List;
 
+import org.jivesoftware.smack.Roster;
 import org.jivesoftware.smack.RosterGroup;
+import org.jivesoftware.smack.packet.Presence;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -26,6 +28,8 @@ public class BuddyListAdapter extends ArrayAdapter<GravityRosterEntry> {
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
 		View v = convertView;
+		Roster roster = ServerConnection.getInstance().getConnection()
+				.getRoster();
 
 		if (v == null) {
 			LayoutInflater vi;
@@ -39,11 +43,12 @@ public class BuddyListAdapter extends ArrayAdapter<GravityRosterEntry> {
 			TextView nameText = (TextView) v.findViewById(R.id.name);
 			TextView groupText = (TextView) v.findViewById(R.id.group);
 			if (statusText != null) {
-				if (entry.getRosterEntry().getStatus() != null) {
-					statusText.setText(entry.getRosterEntry().getStatus()
-							.toString());
-				}
-				statusText.setText("" + entry.getFee());
+				Presence p = roster.getPresence(entry.getRosterEntry()
+						.getUser());
+				statusText.setText("");
+				statusText.setTag(p.toString());
+				statusText.setText(statusText.getText().toString() + " "
+						+ entry.getFee());
 				String name = entry.getName();
 				if (name == null || name.trim().equals("")) {
 					name = entry.getRosterEntry().getUser();

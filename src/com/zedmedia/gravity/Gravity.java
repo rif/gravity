@@ -7,11 +7,7 @@ import org.jivesoftware.smack.Roster;
 import org.jivesoftware.smack.RosterEntry;
 import org.jivesoftware.smack.RosterListener;
 import org.jivesoftware.smack.XMPPException;
-import org.jivesoftware.smack.packet.IQ;
 import org.jivesoftware.smack.packet.Presence;
-import org.jivesoftware.smack.provider.ProviderManager;
-import org.jivesoftware.smackx.packet.VCard;
-import org.jivesoftware.smackx.provider.VCardProvider;
 
 import android.app.Activity;
 import android.content.Context;
@@ -76,7 +72,7 @@ public class Gravity extends Activity implements RosterListener {
 
 			public boolean onItemLongClick(AdapterView<?> parent, View view,
 					int position, long id) {
-				final RosterEntry entry = (RosterEntry) parent
+				final GravityRosterEntry entry = (GravityRosterEntry) parent
 						.getItemAtPosition(position);
 				buddyDialog.show();
 				buddyDialog.setRosterEntry(entry);
@@ -110,6 +106,7 @@ public class Gravity extends Activity implements RosterListener {
 		Collection<RosterEntry> entries = roster.getEntries();
 		buddies.clear();
 		for (RosterEntry entry : entries) {
+
 			if (entry.getStatus() == null) {
 				String name = entry.getName();
 				if (name == null || name.trim().equals("")) {
@@ -187,32 +184,7 @@ public class Gravity extends Activity implements RosterListener {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.quit:
-			// finish();
-			final IQ iq = new IQ() {
-				@Override
-				public String getChildElementXML() {
-					return "<gravity xmlns='custom:iq:gravity'/>";
-				}
-			};
-			iq.setTo("rif@t61");
-			iq.setType(IQ.Type.SET);
-			serverConnection.getConnection().sendPacket(iq);
-			Log.d(TAG, "Sending IQ!!!");
-			Log.d(TAG, serverConnection.getConnection().getAccountManager()
-					.getAccountAttribute("name"));
-			ProviderManager.getInstance().addIQProvider("vCard", "vcard-temp",
-					new VCardProvider());
-			for (RosterEntry r : roster.getEntries()) {
-				Presence presence = roster.getPresence(r.getUser());
-				Log.d(TAG, presence.toXML());
-				VCard vCard = new VCard();
-				try {
-					vCard.load(serverConnection.getConnection(), r.getUser());
-				} catch (XMPPException e) {
-					Log.e(TAG, "Error getting vcard: " + e.getMessage());
-				}
-				Log.d(TAG, "Vcard: " + vCard.toString());
-			}
+			finish();
 			return true;
 		case R.id.logout:
 			ServerConnection.getInstance().logout();
@@ -288,6 +260,16 @@ public class Gravity extends Activity implements RosterListener {
 				startActivity(new Intent(Gravity.this, LoginActivity.class));
 			}
 			return true;
+		}
+
+		@Override
+		protected void onPostExecute(final Boolean success) {
+			// TODO: check success
+		}
+
+		@Override
+		protected void onCancelled() {
+			// TODO: stop loading
 		}
 	}
 }

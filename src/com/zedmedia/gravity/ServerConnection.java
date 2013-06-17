@@ -42,8 +42,7 @@ public class ServerConnection {
 	public final static String USER_ID = "com.zedmedia.gravity.USER_ID";
 	public final static String MESSAGE_FROM = "com.zedmedia.gravity.MESSAGE_FROM";
 	public final static String MESSAGE_BODY = "com.zedmedia.gravity.MESSAGE_BODY";
-	// public static final String HOST = "ded697.ded.reflected.net";
-	public static final String HOST = "t61";
+	public static final String HOST = "ded697.ded.reflected.net";
 	public static final int PORT = 5222;
 	public static final String SERVICE = "";
 	public static final String TAG = "[Gravity AUTH]";
@@ -106,6 +105,8 @@ public class ServerConnection {
 			final ProviderManager pm = ProviderManager.getInstance();
 			pm.addExtensionProvider(GravityExtension.ELEMENT_NAME,
 					GravityExtension.NAMESPACE, new GravityExtension.Provider());
+			ProviderManager.getInstance().addIQProvider("gravity",
+					"custom:iq:gravity", new FeeIQProvider());
 			// Packet listener to get messages sent to logged in user
 			connection.addPacketListener(new IQListener(),
 					new PacketTypeFilter(IQ.class));
@@ -244,7 +245,7 @@ public class ServerConnection {
 					login(username, password);
 				} catch (XMPPException ex2) {
 					Log.e(TAG, ex2.getMessage());
-					setConnection(null);
+					// setConnection(null);
 					return false;
 				}
 			}
@@ -295,7 +296,10 @@ public class ServerConnection {
 	}
 
 	public void logout() {
-		getConnection().disconnect();
+		XMPPConnection conn = getConnection();
+		if (conn != null && conn.isConnected()) {
+			conn.disconnect();
+		}
 		setConnection(null);
 		Session session = Session.getActiveSession();
 		if (session != null && !session.isClosed()) {

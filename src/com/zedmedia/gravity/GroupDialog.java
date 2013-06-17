@@ -1,7 +1,9 @@
 package com.zedmedia.gravity;
 
 import org.jivesoftware.smack.Roster;
+import org.jivesoftware.smack.RosterEntry;
 import org.jivesoftware.smack.RosterGroup;
+import org.jivesoftware.smack.packet.IQ;
 
 import android.app.Dialog;
 import android.util.Log;
@@ -17,6 +19,7 @@ public class GroupDialog extends Dialog {
 	private EditText groupFeeText;
 	private GroupInfo groupInfo;
 	private Gravity mainActivity;
+	private ServerConnection serverConnection;
 
 	public GroupDialog(Gravity gravity) {
 		super(gravity);
@@ -28,6 +31,7 @@ public class GroupDialog extends Dialog {
 		super.onStart();
 		setContentView(R.layout.add_group);
 		setTitle("Add new group");
+		serverConnection = ServerConnection.getInstance();
 		groupNameText = (EditText) GroupDialog.this
 				.findViewById(R.id.group_name);
 		groupFeeText = (EditText) GroupDialog.this.findViewById(R.id.group_fee);
@@ -39,17 +43,18 @@ public class GroupDialog extends Dialog {
 				Roster roster = ServerConnection.getInstance().getConnection()
 						.getRoster();
 				String name = groupNameText.getText().toString();
-				double fee = Double.parseDouble(groupFeeText.getText()
+				final double fee = Double.parseDouble(groupFeeText.getText()
 						.toString());
 				GroupInfo gi = new GroupInfo(name, fee);
 				Gson gson = new Gson();
 				String groupString = gson.toJson(gi);
+				RosterGroup rg = null;
 				if (groupInfo == null) {
-					roster.createGroup(groupString);
+					rg = roster.createGroup(groupString);
 				} else {
 					Log.d(TAG, "Editing group: " + groupInfo.getJson()
 							+ " with new name: " + groupString);
-					RosterGroup rg = roster.getGroup(groupInfo.getJson());
+					rg = roster.getGroup(groupInfo.getJson());
 					if (rg == null) {
 						rg = roster.getGroup(groupInfo.getName());
 					}
@@ -58,6 +63,22 @@ public class GroupDialog extends Dialog {
 						groupInfo.setName(name);
 						groupInfo.setFee(fee);
 					}
+				}
+				// Send IQ information to all in the group with the new fee
+				for (RosterEntry entry : rg.getEntries()) {
+					final IQ iq = new IQ() {
+						@Override
+						public String getChildElementXML() {
+							return "<gravity xmlns='custom:iq:gravity'>" + fee
+									+ "</gravity>";
+						}
+					};
+					Log.d(TAG,
+							"Sending IQ with the new price to: "
+									+ entry.getUser());
+					iq.setTo(entry.getUser());
+					iq.setType(IQ.Type.SET);
+					serverConnection.getConnection().sendPacket(iq);
 				}
 				mainActivity.refreshFeeList();
 				dismiss();

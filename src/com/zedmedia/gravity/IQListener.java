@@ -10,6 +10,6 @@ public class IQListener implements PacketListener {
 
 	@Override
 	public void processPacket(Packet pkt) {
-		Log.d(TAG, "iq packet: "+ pkt);
+		Log.d(TAG, "IQQQQQQQQQQ packet: "+ pkt.toXML());
 	}
 }

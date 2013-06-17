@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.jivesoftware.smack.Roster;
-import org.jivesoftware.smack.RosterEntry;
 import org.jivesoftware.smack.RosterGroup;
 import org.jivesoftware.smack.XMPPException;
 
@@ -24,7 +23,7 @@ public class BuddyDialog extends Dialog {
 	private EditText userIdText;
 	private EditText userNameText;
 	private EditText userGroupText;
-	private RosterEntry editedEntry;
+	private GravityRosterEntry editedEntry;
 
 	public BuddyDialog(Gravity gravity) {
 		super(gravity);
@@ -62,20 +61,26 @@ public class BuddyDialog extends Dialog {
 					editedEntry.setName(userNameText.getText().toString());
 					String group = userGroupText.getText().toString().trim();
 					RosterGroup oldGroup = null;
-					for (RosterGroup rg : editedEntry.getGroups()) {
+					for (RosterGroup rg : editedEntry.getRosterEntry()
+							.getGroups()) {
 						oldGroup = rg;
 						break;
 					}
-					if (oldGroup == null || !group.equals(oldGroup.getName())) {
+					GroupInfo gi = null;
+					if (oldGroup != null) {
+						gi = new GroupInfo(oldGroup);
+					}
+					if (gi == null || !group.equals(gi.getName())) {
 						try {
 							if (oldGroup != null) {
-								oldGroup.removeEntry(editedEntry);
+								oldGroup.removeEntry(editedEntry
+										.getRosterEntry());
 							}
 							RosterGroup newGroup = roster.getGroup(group);
 							if (newGroup == null) {
 								newGroup = roster.createGroup(group);
 							}
-							newGroup.addEntry(editedEntry);
+							newGroup.addEntry(editedEntry.getRosterEntry());
 						} catch (XMPPException e) {
 							Log.e(TAG, e.getMessage());
 						}
@@ -99,18 +104,19 @@ public class BuddyDialog extends Dialog {
 
 	}
 
-	public void setRosterEntry(RosterEntry re) {
+	public void setRosterEntry(GravityRosterEntry re) {
 		editedEntry = re;
 		setTitle("Edit friend");
 		// remove the id edit text
 		userNameText.setText(editedEntry.getName());
 		RosterGroup group = null;
-		for (RosterGroup g : editedEntry.getGroups()) {
+		for (RosterGroup g : editedEntry.getRosterEntry().getGroups()) {
 			group = g;
 			break;
 		}
 		if (group != null) {
-			userGroupText.setText(group.getName());
+			GroupInfo gi = new GroupInfo(group);
+			userGroupText.setText(gi.getName());
 		}
 		((LinearLayout) userIdText.getParent()).removeView(userIdText);
 	}
