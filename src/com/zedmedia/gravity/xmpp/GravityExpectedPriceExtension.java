@@ -1,26 +1,26 @@
-package com.zedmedia.gravity;
+package com.zedmedia.gravity.xmpp;
 
 import org.jivesoftware.smack.packet.PacketExtension;
 import org.jivesoftware.smack.provider.PacketExtensionProvider;
 import org.xmlpull.v1.XmlPullParser;
 
-public class GravityNewPriceExtension implements PacketExtension {
+public class GravityExpectedPriceExtension implements PacketExtension {
 	public static final String ELEMENT_NAME = "gravity";
-	public static final String NAMESPACE = "gravity:new_price";
-	private double newPrice;
+	public static final String NAMESPACE = "gravity:expected_price";
+	private double expectedFee;
 
-	public GravityNewPriceExtension() {
+	public GravityExpectedPriceExtension() {
 	}
 
-	public GravityNewPriceExtension(double newPrice) {
-		this.newPrice = newPrice;
+	public GravityExpectedPriceExtension(double expectedFee) {
+		this.expectedFee = expectedFee;
 	}
 
 	@Override
 	public String toXML() {
 		final StringBuilder sb = new StringBuilder();
 		sb.append("<").append(getElementName()).append(" xmlns=\"")
-				.append(getNamespace()).append("\">").append(newPrice)
+				.append(getNamespace()).append("\">").append(expectedFee)
 				.append("</").append(getElementName()).append(">");
 		return sb.toString();
 	}
@@ -38,7 +38,7 @@ public class GravityNewPriceExtension implements PacketExtension {
 	public static class Provider implements PacketExtensionProvider {
 		public PacketExtension parseExtension(XmlPullParser arg0)
 				throws Exception {
-			return new GravityNewPriceExtension();
+			return new GravityExpectedPriceExtension();
 		}
 	}
 }

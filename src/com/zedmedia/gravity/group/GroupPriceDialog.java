@@ -1,4 +1,4 @@
-package com.zedmedia.gravity;
+package com.zedmedia.gravity.group;
 
 import java.util.ArrayList;
 
@@ -12,7 +12,12 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
-public class FeesDialog extends Dialog {
+import com.zedmedia.gravity.Gravity;
+import com.zedmedia.gravity.R;
+import com.zedmedia.gravity.ServerConnection;
+import com.zedmedia.gravity.xmpp.GroupInfo;
+
+public class GroupPriceDialog extends Dialog {
 	private static final String TAG = "[gravity fees]";
 	private ArrayList<GroupInfo> groups = new ArrayList<GroupInfo>();
 	private ListView list;
@@ -20,7 +25,7 @@ public class FeesDialog extends Dialog {
 	private ArrayAdapter<GroupInfo> listAdapter;
 	private Roster roster;
 
-	public FeesDialog(Gravity gravity) {
+	public GroupPriceDialog(Gravity gravity) {
 		super(gravity);
 		mainActivity = gravity;
 	}
@@ -51,7 +56,7 @@ public class FeesDialog extends Dialog {
 	}
 
 	public void refreshList() {
-		Log.d(TAG,"Refreshing fees: " + roster );
+		Log.d(TAG, "Refreshing fees: " + roster);
 		if (roster != null) {
 			groups.clear();
 			for (RosterGroup rg : roster.getGroups()) {

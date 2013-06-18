@@ -1,4 +1,4 @@
-package com.zedmedia.gravity;
+package com.zedmedia.gravity.buddy;
 
 import java.util.List;
 
@@ -12,6 +12,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
+
+import com.zedmedia.gravity.R;
+import com.zedmedia.gravity.ServerConnection;
+import com.zedmedia.gravity.xmpp.GravityRosterEntry;
+import com.zedmedia.gravity.xmpp.GroupInfo;
 
 public class BuddyListAdapter extends ArrayAdapter<GravityRosterEntry> {
 	private List<GravityRosterEntry> entries;

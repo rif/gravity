@@ -26,6 +26,12 @@ import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ListView;
 
 import com.facebook.Session;
+import com.zedmedia.gravity.auth.LoginActivity;
+import com.zedmedia.gravity.buddy.BuddyDialog;
+import com.zedmedia.gravity.buddy.BuddyListAdapter;
+import com.zedmedia.gravity.group.GroupDialog;
+import com.zedmedia.gravity.group.GroupPriceDialog;
+import com.zedmedia.gravity.xmpp.GravityRosterEntry;
 
 public class Gravity extends Activity implements RosterListener {
 	private static final String TAG = "[GRAVITY]";
@@ -37,7 +43,7 @@ public class Gravity extends Activity implements RosterListener {
 	private ListView list;
 	private GroupDialog groupDialog;
 	private BuddyDialog buddyDialog;
-	private FeesDialog feesDialog;
+	private GroupPriceDialog feesDialog;
 
 	@Override
 	protected void onResume() {
@@ -52,7 +58,7 @@ public class Gravity extends Activity implements RosterListener {
 		setContentView(R.layout.activity_roster);
 		groupDialog = new GroupDialog(this);
 		buddyDialog = new BuddyDialog(this);
-		feesDialog = new FeesDialog(this);
+		feesDialog = new GroupPriceDialog(this);
 		listAdapter = new BuddyListAdapter(this, R.layout.list, buddies);
 		serverConnection = ServerConnection.getInstance();
 		ServerConnection.setMainActivity(this);

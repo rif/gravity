@@ -1,4 +1,4 @@
-package com.zedmedia.gravity;
+package com.zedmedia.gravity.group;
 
 import org.jivesoftware.smack.Roster;
 import org.jivesoftware.smack.RosterEntry;
@@ -12,6 +12,10 @@ import android.widget.Button;
 import android.widget.EditText;
 
 import com.google.gson.Gson;
+import com.zedmedia.gravity.Gravity;
+import com.zedmedia.gravity.R;
+import com.zedmedia.gravity.ServerConnection;
+import com.zedmedia.gravity.xmpp.GroupInfo;
 
 public class GroupDialog extends Dialog {
 	private static final String TAG = "[gravity group]";
@@ -61,7 +65,7 @@ public class GroupDialog extends Dialog {
 					if (rg != null) {
 						rg.setName(groupString);
 						groupInfo.setName(name);
-						groupInfo.setFee(fee);
+						groupInfo.setPrice(fee);
 					}
 				}
 				// Send IQ information to all in the group with the new fee
@@ -81,6 +85,6 @@ public class GroupDialog extends Dialog {
 	public void setGroupInfo(GroupInfo gi) {
 		groupInfo = gi;
 		groupNameText.setText(groupInfo.getName());
-		groupFeeText.setText("" + groupInfo.getFee());
+		groupFeeText.setText("" + groupInfo.getPrice());
 	}
 }

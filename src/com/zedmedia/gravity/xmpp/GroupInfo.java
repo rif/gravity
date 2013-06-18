@@ -1,4 +1,4 @@
-package com.zedmedia.gravity;
+package com.zedmedia.gravity.xmpp;
 
 import org.jivesoftware.smack.RosterGroup;
 
@@ -7,14 +7,14 @@ import com.google.gson.JsonSyntaxException;
 
 public class GroupInfo {
 	private String name;
-	private double fee;
+	private double price;
 
 	public GroupInfo() {
 	}
 
 	public GroupInfo(String name, double fee) {
 		this.name = name;
-		this.fee = fee;
+		this.price = fee;
 	}
 
 	public GroupInfo(RosterGroup rg) {
@@ -26,10 +26,10 @@ public class GroupInfo {
 		try {
 			GroupInfo gi = gson.fromJson(json, GroupInfo.class);
 			setName(gi.getName());
-			setFee(gi.getFee());
+			setPrice(gi.getPrice());
 		} catch (JsonSyntaxException jse) {
 			setName(json);
-			setFee(0);
+			setPrice(0);
 		}
 	}
 
@@ -41,16 +41,16 @@ public class GroupInfo {
 		this.name = name;
 	}
 
-	public double getFee() {
-		return fee;
+	public double getPrice() {
+		return price;
 	}
 
-	public void setFee(double fee) {
-		this.fee = fee;
+	public void setPrice(double fee) {
+		this.price = fee;
 	}
 
 	public String toString() {
-		return name + " [" + fee + "]";
+		return name + " [" + price + "]";
 	}
 
 	public String getJson() {

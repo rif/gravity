@@ -1,4 +1,4 @@
-package com.zedmedia.gravity;
+package com.zedmedia.gravity.xmpp;
 
 import org.jivesoftware.smack.RosterEntry;
 

@@ -1,4 +1,4 @@
-package com.zedmedia.gravity;
+package com.zedmedia.gravity.xmpp;
 
 import java.util.Map;
 
@@ -8,6 +8,10 @@ import org.jivesoftware.smack.RosterEntry;
 import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smack.packet.Packet;
 import org.jivesoftware.smack.util.StringUtils;
+
+import com.zedmedia.gravity.ChatActivity;
+import com.zedmedia.gravity.Gravity;
+import com.zedmedia.gravity.ServerConnection;
 
 import android.content.Intent;
 import android.util.Log;

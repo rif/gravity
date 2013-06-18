@@ -1,4 +1,4 @@
-package com.zedmedia.gravity;
+package com.zedmedia.gravity.auth;
 
 import org.jivesoftware.smack.XMPPException;
 
@@ -6,72 +6,76 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.app.NavUtils;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.zedmedia.gravity.Gravity;
+import com.zedmedia.gravity.R;
+import com.zedmedia.gravity.ServerConnection;
+
 /**
  * Activity which displays a login screen to the user, offering registration as
  * well.
  */
-public class RegisterActivity extends Activity {
+public class LoginActivity extends Activity {
+
+	/**
+	 * The default email to populate the email field with.
+	 */
 	public static final String EXTRA_EMAIL = "com.example.android.authenticatordemo.extra.EMAIL";
 
 	/**
 	 * Keep track of the login task to ensure we can cancel it if requested.
 	 */
-	private UserRegisterTask mAuthTask = null;
+	private UserLoginTask mAuthTask = null;
 
 	// Values for email and password at the time of the login attempt.
 	private String mEmail;
-	private String mFirstName;
-	private String mLastName;
 	private String mPassword;
 
 	// UI references.
-	private EditText mFirstNameView;
-	private EditText mLastNameView;
 	private EditText mEmailView;
-	private EditText mPassword1View;
-	private EditText mPassword2View;
+	private EditText mPasswordView;
 	private View mLoginFormView;
 	private View mLoginStatusView;
 	private TextView mLoginStatusMessageView;
-
 	private ServerConnection serverConnection;
+	private Gravity mainActivity;
 
 	@Override
-	protected void onCreate(Bundle savedInstanceState) {
+	protected void onCreate(final Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		setContentView(R.layout.activity_register);
-
 		serverConnection = ServerConnection.getInstance();
+		mainActivity = (Gravity) this.getParent();
+
+		setContentView(R.layout.activity_login);
+		setupActionBar();
 
 		// Set up the login form.
 		mEmail = getIntent().getStringExtra(EXTRA_EMAIL);
-		mFirstNameView = (EditText) findViewById(R.id.first_name);
-		mLastNameView = (EditText) findViewById(R.id.last_name);
 		mEmailView = (EditText) findViewById(R.id.email);
 		mEmailView.setText(mEmail);
 
-		mPassword1View = (EditText) findViewById(R.id.password1);
-		mPassword2View = (EditText) findViewById(R.id.password2);
-		mPassword2View
+		mPasswordView = (EditText) findViewById(R.id.password);
+		mPasswordView
 				.setOnEditorActionListener(new TextView.OnEditorActionListener() {
 					@Override
 					public boolean onEditorAction(TextView textView, int id,
 							KeyEvent keyEvent) {
 						if (id == R.id.login || id == EditorInfo.IME_NULL) {
-							attemptRegister();
+							attemptLogin();
 							return true;
 						}
 						return false;
@@ -82,19 +86,67 @@ public class RegisterActivity extends Activity {
 		mLoginStatusView = findViewById(R.id.login_status);
 		mLoginStatusMessageView = (TextView) findViewById(R.id.login_status_message);
 
-		findViewById(R.id.register_action_button).setOnClickListener(
+		findViewById(R.id.sign_in_button).setOnClickListener(
 				new View.OnClickListener() {
 					@Override
 					public void onClick(View view) {
-						attemptRegister();
+						attemptLogin();
 					}
 				});
+		findViewById(R.id.register_button).setOnClickListener(
+				new View.OnClickListener() {
+					@Override
+					public void onClick(View view) {
+						startActivity(new Intent(LoginActivity.this,
+								RegisterActivity.class));
+						LoginActivity.this.finish();
+					}
+				});
+		findViewById(R.id.facebook_login_button).setOnClickListener(
+				new View.OnClickListener() {
+					@Override
+					public void onClick(View view) {
+						serverConnection.initFbLogin(savedInstanceState,
+								mainActivity);
+						LoginActivity.this.finish();
+					}
+				});
+	}
+
+	/**
+	 * Set up the {@link android.app.ActionBar}, if the API is available.
+	 */
+	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
+	private void setupActionBar() {
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+			// Show the Up button in the action bar.
+			getActionBar().setDisplayHomeAsUpEnabled(true);
+		}
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+		case android.R.id.home:
+			// This ID represents the Home or Up button. In the case of this
+			// activity, the Up button is shown. Use NavUtils to allow users
+			// to navigate up one level in the application structure. For
+			// more details, see the Navigation pattern on Android Design:
+			//
+			// http://developer.android.com/design/patterns/navigation.html#up-vs-back
+			//
+			// TODO: If Settings has multiple levels, Up should navigate up
+			// that hierarchy.
+			NavUtils.navigateUpFromSameTask(this);
+			return true;
+		}
+		return super.onOptionsItemSelected(item);
 	}
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		super.onCreateOptionsMenu(menu);
-		getMenuInflater().inflate(R.menu.register, menu);
+		getMenuInflater().inflate(R.menu.login, menu);
 		return true;
 	}
 
@@ -103,38 +155,30 @@ public class RegisterActivity extends Activity {
 	 * If there are form errors (invalid email, missing fields, etc.), the
 	 * errors are presented and no actual login attempt is made.
 	 */
-	public void attemptRegister() {
+	public void attemptLogin() {
 		if (mAuthTask != null) {
 			return;
 		}
 
 		// Reset errors.
 		mEmailView.setError(null);
-		mPassword1View.setError(null);
-		mPassword2View.setError(null);
+		mPasswordView.setError(null);
 
 		// Store values at the time of the login attempt.
-		mFirstName = mFirstNameView.getText().toString();
-		mLastName = mLastNameView.getText().toString();
 		mEmail = mEmailView.getText().toString();
-		mPassword = mPassword1View.getText().toString();
-		String mPassword2 = mPassword2View.getText().toString();
+		mPassword = mPasswordView.getText().toString();
 
 		boolean cancel = false;
 		View focusView = null;
 
 		// Check for a valid password.
 		if (TextUtils.isEmpty(mPassword)) {
-			mPassword1View.setError(getString(R.string.error_field_required));
-			focusView = mPassword1View;
+			mPasswordView.setError(getString(R.string.error_field_required));
+			focusView = mPasswordView;
 			cancel = true;
 		} else if (mPassword.length() < 4) {
-			mPassword1View.setError(getString(R.string.error_invalid_password));
-			focusView = mPassword1View;
-			cancel = true;
-		} else if (!mPassword.equals(mPassword2)) {
-			mPassword2View.setError(getString(R.string.error_match_password));
-			focusView = mPassword2View;
+			mPasswordView.setError(getString(R.string.error_invalid_password));
+			focusView = mPasswordView;
 			cancel = true;
 		}
 
@@ -149,24 +193,6 @@ public class RegisterActivity extends Activity {
 			cancel = true;
 		}
 
-		if (TextUtils.isEmpty(mFirstName)) {
-			mFirstNameView.setError(getString(R.string.error_field_required));
-			focusView = mFirstNameView;
-			cancel = true;
-		}
-
-		if (TextUtils.isEmpty(mLastName)) {
-			mLastNameView.setError(getString(R.string.error_field_required));
-			focusView = mLastNameView;
-			cancel = true;
-		}
-
-		if (TextUtils.isEmpty(mEmail)) {
-			mEmailView.setError(getString(R.string.error_field_required));
-			focusView = mEmailView;
-			cancel = true;
-		}
-
 		if (cancel) {
 			// There was an error; don't attempt login and focus the first
 			// form field with an error.
@@ -176,7 +202,7 @@ public class RegisterActivity extends Activity {
 			// perform the user login attempt.
 			mLoginStatusMessageView.setText(R.string.login_progress_signing_in);
 			showProgress(true);
-			mAuthTask = new UserRegisterTask();
+			mAuthTask = new UserLoginTask();
 			mAuthTask.execute((Void) null);
 		}
 	}
@@ -222,11 +248,20 @@ public class RegisterActivity extends Activity {
 		}
 	}
 
+	@Override
+	public boolean onKeyDown(int keyCode, KeyEvent event) {
+		if (keyCode == KeyEvent.KEYCODE_BACK) {
+			moveTaskToBack(true);
+			return true;
+		}
+		return super.onKeyDown(keyCode, event);
+	}
+
 	/**
 	 * Represents an asynchronous login/registration task used to authenticate
 	 * the user.
 	 */
-	public class UserRegisterTask extends AsyncTask<Void, Void, Boolean> {
+	public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
 		@Override
 		protected Boolean doInBackground(Void... params) {
 			try {
@@ -236,13 +271,10 @@ public class RegisterActivity extends Activity {
 			}
 			String username = ServerConnection.getUser(mEmail);
 			try {
-				serverConnection.register(username, mFirstName, mLastName,
-						mEmail, mPassword);
+				serverConnection.login(username, mPassword);
 			} catch (XMPPException e) {
-				Log.e("REGISTRATION FAILED!", e.getMessage());
 				return false;
 			}
-
 			return true;
 		}
 
@@ -254,9 +286,9 @@ public class RegisterActivity extends Activity {
 			if (success) {
 				finish();
 			} else {
-				mPassword1View
+				mPasswordView
 						.setError(getString(R.string.error_incorrect_password));
-				mPassword1View.requestFocus();
+				mPasswordView.requestFocus();
 			}
 		}
 

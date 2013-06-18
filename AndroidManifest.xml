@@ -40,7 +40,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com.zedmedia.gravity.LoginActivity"
+            android:name="com.zedmedia.gravity.auth.LoginActivity"
             android:label="@string/title_activity_login"
             android:parentActivityName="Gravity"
             android:windowSoftInputMode="adjustResize|stateVisible" >
@@ -49,7 +49,7 @@
                 android:value="Gravity" />
         </activity>
         <activity
-            android:name="com.zedmedia.gravity.RegisterActivity"
+            android:name="com.zedmedia.gravity.auth.RegisterActivity"
             android:label="@string/title_activity_register"
             android:windowSoftInputMode="adjustResize|stateVisible" >
         </activity>

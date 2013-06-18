@@ -7,6 +7,9 @@ import org.jivesoftware.smack.RosterEntry;
 import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smack.util.StringUtils;
 
+import com.zedmedia.gravity.xmpp.GravityExpectedPriceExtension;
+import com.zedmedia.gravity.xmpp.GravityRosterEntry;
+
 import android.app.Activity;
 import android.os.Bundle;
 import android.os.Handler;

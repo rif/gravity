@@ -1,4 +1,4 @@
-package com.zedmedia.gravity;
+package com.zedmedia.gravity.buddy;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,6 +15,12 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+
+import com.zedmedia.gravity.Gravity;
+import com.zedmedia.gravity.R;
+import com.zedmedia.gravity.ServerConnection;
+import com.zedmedia.gravity.xmpp.GravityRosterEntry;
+import com.zedmedia.gravity.xmpp.GroupInfo;
 
 public class BuddyDialog extends Dialog {
 	private static final String TAG = "[Gravity user]";
