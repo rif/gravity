@@ -3,7 +3,7 @@ package com.zedmedia.gravity;
 import org.jivesoftware.smack.Roster;
 import org.jivesoftware.smack.RosterEntry;
 import org.jivesoftware.smack.RosterGroup;
-import org.jivesoftware.smack.packet.IQ;
+import org.jivesoftware.smack.packet.Message;
 
 import android.app.Dialog;
 import android.util.Log;
@@ -66,19 +66,10 @@ public class GroupDialog extends Dialog {
 				}
 				// Send IQ information to all in the group with the new fee
 				for (RosterEntry entry : rg.getEntries()) {
-					final IQ iq = new IQ() {
-						@Override
-						public String getChildElementXML() {
-							return "<gravity xmlns='custom:iq:gravity'>" + fee
-									+ "</gravity>";
-						}
-					};
-					Log.d(TAG,
-							"Sending IQ with the new price to: "
-									+ entry.getUser());
-					iq.setTo(entry.getUser());
-					iq.setType(IQ.Type.SET);
-					serverConnection.getConnection().sendPacket(iq);
+					Message msg = new Message(entry.getUser(),
+							Message.Type.chat);
+					msg.setProperty("new_price", fee);
+					serverConnection.getConnection().sendPacket(msg);
 				}
 				mainActivity.refreshFeeList();
 				dismiss();

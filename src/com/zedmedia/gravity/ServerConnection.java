@@ -9,8 +9,6 @@ import java.util.Map;
 
 import org.jivesoftware.smack.AccountManager;
 import org.jivesoftware.smack.ConnectionConfiguration;
-import org.jivesoftware.smack.PacketListener;
-import org.jivesoftware.smack.RosterEntry;
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.filter.MessageTypeFilter;
@@ -18,13 +16,10 @@ import org.jivesoftware.smack.filter.PacketFilter;
 import org.jivesoftware.smack.filter.PacketTypeFilter;
 import org.jivesoftware.smack.packet.IQ;
 import org.jivesoftware.smack.packet.Message;
-import org.jivesoftware.smack.packet.Packet;
 import org.jivesoftware.smack.packet.Presence;
 import org.jivesoftware.smack.provider.ProviderManager;
-import org.jivesoftware.smack.util.StringUtils;
 
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -48,12 +43,12 @@ public class ServerConnection {
 	public static final String TAG = "[Gravity AUTH]";
 	private XMPPConnection connection;
 	private Session.StatusCallback statusCallback = new SessionStatusCallback();
-	private Gravity mainActivity;
-	private Map<RosterEntry, ChatActivity> activeChats;
+	private static Gravity mainActivity;
+
 	private static ServerConnection serverConnection;
 
 	private ServerConnection() {
-		activeChats = new HashMap<RosterEntry, ChatActivity>();
+
 	}
 
 	public static ServerConnection getInstance() {
@@ -63,8 +58,12 @@ public class ServerConnection {
 		return serverConnection;
 	}
 
-	public void setMainActivity(Gravity gravity) {
+	public static void setMainActivity(Gravity gravity) {
 		mainActivity = gravity;
+	}
+
+	public static Gravity getMainActivity() {
+		return mainActivity;
 	}
 
 	public void initFbLogin(Bundle savedInstanceState, Gravity main) {
@@ -103,45 +102,16 @@ public class ServerConnection {
 		if (connection != null) {
 			mainActivity.setRoster(connection.getRoster());
 			final ProviderManager pm = ProviderManager.getInstance();
-			pm.addExtensionProvider(GravityExtension.ELEMENT_NAME,
-					GravityExtension.NAMESPACE, new GravityExtension.Provider());
-			ProviderManager.getInstance().addIQProvider("gravity",
-					"custom:iq:gravity", new FeeIQProvider());
+			pm.addExtensionProvider(GravityExpectedPriceExtension.ELEMENT_NAME,
+					GravityExpectedPriceExtension.NAMESPACE,
+					new GravityExpectedPriceExtension.Provider());
+			pm.addIQProvider(FeeIQProvider.ELEMENT_NAME,
+					FeeIQProvider.NAMESPACE, new FeeIQProvider());
 			// Packet listener to get messages sent to logged in user
 			connection.addPacketListener(new IQListener(),
 					new PacketTypeFilter(IQ.class));
 			PacketFilter filter = new MessageTypeFilter(Message.Type.chat);
-			connection.addPacketListener(new PacketListener() {
-				public void processPacket(Packet packet) {
-					Message message = (Message) packet;
-					if (message.getBody() != null) {
-						String from = StringUtils.parseBareAddress(message
-								.getFrom());
-						RosterEntry entry = getConnection().getRoster()
-								.getEntry(from);
-						ChatActivity chatActivity = null;
-						if (entry != null) {
-							chatActivity = activeChats.get(entry);
-						} else {
-							// receive messages from users not in your list
-							chatActivity = activeChats.get(StringUtils
-									.parseBareAddress(from));
-						}
-						if (chatActivity != null) {
-							chatActivity.displayMessage(message);
-						} else {
-							// start new chat activity
-							Intent intent = new Intent(mainActivity,
-									ChatActivity.class);
-							intent.putExtra(USER_ID, entry.getUser());
-							intent.putExtra(MESSAGE_BODY, message.getBody());
-							mainActivity.startActivity(intent);
-							// the new activity registered itself
-							chatActivity = activeChats.get(from);
-						}
-					}
-				}
-			}, filter);
+			connection.addPacketListener(new GravityMessageListener(), filter);
 		}
 	}
 
@@ -151,14 +121,6 @@ public class ServerConnection {
 
 	public Session.StatusCallback getFacebookStatusCallback() {
 		return statusCallback;
-	}
-
-	public void addActiveChat(RosterEntry to, ChatActivity activity) {
-		activeChats.put(to, activity);
-	}
-
-	public void removeActiveChat(RosterEntry to) {
-		activeChats.remove(to);
 	}
 
 	static String toSHA1(String convertme) {

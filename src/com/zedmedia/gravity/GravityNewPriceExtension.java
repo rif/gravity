@@ -4,23 +4,23 @@ import org.jivesoftware.smack.packet.PacketExtension;
 import org.jivesoftware.smack.provider.PacketExtensionProvider;
 import org.xmlpull.v1.XmlPullParser;
 
-public class GravityExtension implements PacketExtension {
+public class GravityNewPriceExtension implements PacketExtension {
 	public static final String ELEMENT_NAME = "gravity";
-	public static final String NAMESPACE = "gravity:expected_price";
-	private double expectedFee;
+	public static final String NAMESPACE = "gravity:new_price";
+	private double newPrice;
 
-	public GravityExtension() {
+	public GravityNewPriceExtension() {
 	}
 
-	public GravityExtension(double expectedFee) {
-		this.expectedFee = expectedFee;
+	public GravityNewPriceExtension(double newPrice) {
+		this.newPrice = newPrice;
 	}
 
 	@Override
 	public String toXML() {
 		final StringBuilder sb = new StringBuilder();
 		sb.append("<").append(getElementName()).append(" xmlns=\"")
-				.append(getNamespace()).append("\">").append(expectedFee)
+				.append(getNamespace()).append("\">").append(newPrice)
 				.append("</").append(getElementName()).append(">");
 		return sb.toString();
 	}
@@ -38,7 +38,7 @@ public class GravityExtension implements PacketExtension {
 	public static class Provider implements PacketExtensionProvider {
 		public PacketExtension parseExtension(XmlPullParser arg0)
 				throws Exception {
-			return new GravityExtension();
+			return new GravityNewPriceExtension();
 		}
 	}
 }

@@ -2,6 +2,8 @@ package com.zedmedia.gravity;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.jivesoftware.smack.Roster;
 import org.jivesoftware.smack.RosterEntry;
@@ -28,6 +30,7 @@ import com.facebook.Session;
 public class Gravity extends Activity implements RosterListener {
 	private static final String TAG = "[GRAVITY]";
 	private ArrayList<GravityRosterEntry> buddies = new ArrayList<GravityRosterEntry>();
+	private static Map<RosterEntry, ChatActivity> activeChats;
 	private BuddyListAdapter listAdapter;
 	private ServerConnection serverConnection;
 	private Roster roster;
@@ -52,7 +55,8 @@ public class Gravity extends Activity implements RosterListener {
 		feesDialog = new FeesDialog(this);
 		listAdapter = new BuddyListAdapter(this, R.layout.list, buddies);
 		serverConnection = ServerConnection.getInstance();
-		serverConnection.setMainActivity(this);
+		ServerConnection.setMainActivity(this);
+		activeChats = new HashMap<RosterEntry, ChatActivity>();
 		list = (ListView) this.findViewById(R.id.buddyList);
 		list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
@@ -97,6 +101,18 @@ public class Gravity extends Activity implements RosterListener {
 
 		// clearAllRosterEntries();
 		refreshRoster();
+	}
+	
+	public static Map<RosterEntry, ChatActivity> getActiveChats() {
+		return activeChats;
+	}
+	
+	public static void addActiveChat(RosterEntry to, ChatActivity activity) {
+		activeChats.put(to, activity);
+	}
+
+	public static void removeActiveChat(RosterEntry to) {
+		activeChats.remove(to);
 	}
 
 	private void refreshRoster() {

@@ -42,7 +42,7 @@ public class ChatActivity extends Activity {
 		String address = getIntent().getStringExtra(ServerConnection.USER_ID);
 		recipient = serverConnection.getConnection().getRoster()
 				.getEntry(address);
-		serverConnection.addActiveChat(recipient, this);
+		Gravity.addActiveChat(recipient, this);
 		String body = getIntent().getStringExtra(ServerConnection.MESSAGE_BODY);
 		if (body != null) {
 			displayMessage(getRecipientName(recipient), body);
@@ -86,18 +86,19 @@ public class ChatActivity extends Activity {
 	@Override
 	public void onStop() {
 		super.onStop();
-		serverConnection.removeActiveChat(recipient);
+		Gravity.removeActiveChat(recipient);
 	}
 
 	/** Called when the user clicks the Send button */
 	public void sendMessage(View view) {
 		String message = text.getText().toString();
 		text.setText("");
-
+		GravityRosterEntry re = new GravityRosterEntry(recipient);
+		
 		Message msg = new Message(recipient.getUser(), Message.Type.chat);
-		Log.d(TAG, "Recipient: " + recipient);
-		msg.setBody(message);
-		msg.addExtension(new GravityExtension(1.4));
+		Log.d(TAG, "expecting: " + re.getFee());
+		msg.setBody(message);		
+		msg.addExtension(new GravityExpectedPriceExtension(re.getFee()));
 		serverConnection.getConnection().sendPacket(msg);
 		messages.add(serverConnection.getConnection().getAccountManager()
 				.getAccountAttribute("name")
