@@ -16,7 +16,7 @@ import android.widget.TextView;
 import com.zedmedia.gravity.R;
 import com.zedmedia.gravity.ServerConnection;
 import com.zedmedia.gravity.xmpp.GravityRosterEntry;
-import com.zedmedia.gravity.xmpp.GroupInfo;
+import com.zedmedia.gravity.xmpp.GravityRosterGroup;
 
 public class BuddyListAdapter extends ArrayAdapter<GravityRosterEntry> {
 	private List<GravityRosterEntry> entries;
@@ -60,7 +60,7 @@ public class BuddyListAdapter extends ArrayAdapter<GravityRosterEntry> {
 				}
 				nameText.setText(name);
 				for (RosterGroup rg : entry.getRosterEntry().getGroups()) {
-					GroupInfo gi = new GroupInfo(rg);
+					GravityRosterGroup gi = new GravityRosterGroup(rg);
 					groupText.setText(gi.getName());
 					break;
 				}

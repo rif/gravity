@@ -5,26 +5,26 @@ import org.jivesoftware.smack.RosterGroup;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 
-public class GroupInfo {
+public class GravityRosterGroup {
 	private String name;
 	private double price;
 
-	public GroupInfo() {
+	public GravityRosterGroup() {
 	}
 
-	public GroupInfo(String name, double fee) {
+	public GravityRosterGroup(String name, double fee) {
 		this.name = name;
 		this.price = fee;
 	}
 
-	public GroupInfo(RosterGroup rg) {
+	public GravityRosterGroup(RosterGroup rg) {
 		this(rg.getName());
 	}
 	
-	public GroupInfo(String json) {
+	public GravityRosterGroup(String json) {
 		Gson gson = new Gson();
 		try {
-			GroupInfo gi = gson.fromJson(json, GroupInfo.class);
+			GravityRosterGroup gi = gson.fromJson(json, GravityRosterGroup.class);
 			setName(gi.getName());
 			setPrice(gi.getPrice());
 		} catch (JsonSyntaxException jse) {

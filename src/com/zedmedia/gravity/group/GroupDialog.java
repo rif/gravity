@@ -15,13 +15,13 @@ import com.google.gson.Gson;
 import com.zedmedia.gravity.Gravity;
 import com.zedmedia.gravity.R;
 import com.zedmedia.gravity.ServerConnection;
-import com.zedmedia.gravity.xmpp.GroupInfo;
+import com.zedmedia.gravity.xmpp.GravityRosterGroup;
 
 public class GroupDialog extends Dialog {
 	private static final String TAG = "[gravity group]";
 	private EditText groupNameText;
 	private EditText groupFeeText;
-	private GroupInfo groupInfo;
+	private GravityRosterGroup groupInfo;
 	private Gravity mainActivity;
 	private ServerConnection serverConnection;
 
@@ -49,7 +49,7 @@ public class GroupDialog extends Dialog {
 				String name = groupNameText.getText().toString();
 				final double fee = Double.parseDouble(groupFeeText.getText()
 						.toString());
-				GroupInfo gi = new GroupInfo(name, fee);
+				GravityRosterGroup gi = new GravityRosterGroup(name, fee);
 				Gson gson = new Gson();
 				String groupString = gson.toJson(gi);
 				RosterGroup rg = null;
@@ -82,7 +82,7 @@ public class GroupDialog extends Dialog {
 		});
 	}
 
-	public void setGroupInfo(GroupInfo gi) {
+	public void setGroupInfo(GravityRosterGroup gi) {
 		groupInfo = gi;
 		groupNameText.setText(groupInfo.getName());
 		groupFeeText.setText("" + groupInfo.getPrice());

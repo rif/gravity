@@ -15,14 +15,14 @@ import android.widget.ListView;
 import com.zedmedia.gravity.Gravity;
 import com.zedmedia.gravity.R;
 import com.zedmedia.gravity.ServerConnection;
-import com.zedmedia.gravity.xmpp.GroupInfo;
+import com.zedmedia.gravity.xmpp.GravityRosterGroup;
 
 public class GroupPriceDialog extends Dialog {
 	private static final String TAG = "[gravity fees]";
-	private ArrayList<GroupInfo> groups = new ArrayList<GroupInfo>();
+	private ArrayList<GravityRosterGroup> groups = new ArrayList<GravityRosterGroup>();
 	private ListView list;
 	private Gravity mainActivity;
-	private ArrayAdapter<GroupInfo> listAdapter;
+	private ArrayAdapter<GravityRosterGroup> listAdapter;
 	private Roster roster;
 
 	public GroupPriceDialog(Gravity gravity) {
@@ -49,7 +49,7 @@ public class GroupPriceDialog extends Dialog {
 		});
 		roster = ServerConnection.getInstance().getConnection().getRoster();
 
-		listAdapter = new ArrayAdapter<GroupInfo>(mainActivity, R.layout.list,
+		listAdapter = new ArrayAdapter<GravityRosterGroup>(mainActivity, R.layout.list,
 				groups);
 		list.setAdapter(listAdapter);
 		refreshList();
@@ -60,7 +60,7 @@ public class GroupPriceDialog extends Dialog {
 		if (roster != null) {
 			groups.clear();
 			for (RosterGroup rg : roster.getGroups()) {
-				groups.add(new GroupInfo(rg));
+				groups.add(new GravityRosterGroup(rg));
 			}
 			listAdapter.notifyDataSetChanged();
 		}

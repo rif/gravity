@@ -6,6 +6,7 @@ import java.util.List;
 import org.jivesoftware.smack.Roster;
 import org.jivesoftware.smack.RosterGroup;
 import org.jivesoftware.smack.XMPPException;
+import org.jivesoftware.smack.packet.Message;
 
 import android.app.Dialog;
 import android.util.Log;
@@ -20,7 +21,7 @@ import com.zedmedia.gravity.Gravity;
 import com.zedmedia.gravity.R;
 import com.zedmedia.gravity.ServerConnection;
 import com.zedmedia.gravity.xmpp.GravityRosterEntry;
-import com.zedmedia.gravity.xmpp.GroupInfo;
+import com.zedmedia.gravity.xmpp.GravityRosterGroup;
 
 public class BuddyDialog extends Dialog {
 	private static final String TAG = "[Gravity user]";
@@ -72,9 +73,9 @@ public class BuddyDialog extends Dialog {
 						oldGroup = rg;
 						break;
 					}
-					GroupInfo gi = null;
+					GravityRosterGroup gi = null;
 					if (oldGroup != null) {
-						gi = new GroupInfo(oldGroup);
+						gi = new GravityRosterGroup(oldGroup);
 					}
 					if (gi == null || !group.equals(gi.getName())) {
 						try {
@@ -87,6 +88,11 @@ public class BuddyDialog extends Dialog {
 								newGroup = roster.createGroup(group);
 							}
 							newGroup.addEntry(editedEntry.getRosterEntry());
+							GravityRosterGroup newGi = new GravityRosterGroup(newGroup);
+							Message msg = new Message(editedEntry.getRosterEntry().getUser(),
+									Message.Type.chat);
+							msg.setProperty("new_price", newGi.getPrice());
+							ServerConnection.getInstance().getConnection().sendPacket(msg);
 						} catch (XMPPException e) {
 							Log.e(TAG, e.getMessage());
 						}
@@ -121,7 +127,7 @@ public class BuddyDialog extends Dialog {
 			break;
 		}
 		if (group != null) {
-			GroupInfo gi = new GroupInfo(group);
+			GravityRosterGroup gi = new GravityRosterGroup(group);
 			userGroupText.setText(gi.getName());
 		}
 		((LinearLayout) userIdText.getParent()).removeView(userIdText);
