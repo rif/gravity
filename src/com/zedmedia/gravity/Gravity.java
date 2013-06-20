@@ -9,6 +9,7 @@ import org.jivesoftware.smack.Roster;
 import org.jivesoftware.smack.RosterEntry;
 import org.jivesoftware.smack.RosterListener;
 import org.jivesoftware.smack.XMPPException;
+import org.jivesoftware.smack.packet.IQ;
 import org.jivesoftware.smack.packet.Presence;
 
 import android.app.Activity;
@@ -108,11 +109,11 @@ public class Gravity extends Activity implements RosterListener {
 		// clearAllRosterEntries();
 		refreshRoster();
 	}
-	
+
 	public static Map<RosterEntry, ChatActivity> getActiveChats() {
 		return activeChats;
 	}
-	
+
 	public static void addActiveChat(RosterEntry to, ChatActivity activity) {
 		activeChats.put(to, activity);
 	}
@@ -206,7 +207,15 @@ public class Gravity extends Activity implements RosterListener {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.quit:
-			finish();
+			// finish();
+			final IQ iq = new IQ() {
+				@Override
+				public String getChildElementXML() {
+					return "<gravity xmlns='custom:iq:gravity'/>";
+				}
+			};
+			iq.setType(IQ.Type.GET);
+			serverConnection.getConnection().sendPacket(iq);
 			return true;
 		case R.id.logout:
 			ServerConnection.getInstance().logout();
