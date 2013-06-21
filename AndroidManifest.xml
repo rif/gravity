@@ -53,6 +53,10 @@
             android:label="@string/title_activity_register"
             android:windowSoftInputMode="adjustResize|stateVisible" >
         </activity>
+        <activity
+            android:name="com.zedmedia.gravity.credit.CreditActivity"
+            android:label="@string/title_activity_credit" >
+        </activity>
     </application>
 
 </manifest>

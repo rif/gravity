@@ -9,7 +9,6 @@ import org.jivesoftware.smack.Roster;
 import org.jivesoftware.smack.RosterEntry;
 import org.jivesoftware.smack.RosterListener;
 import org.jivesoftware.smack.XMPPException;
-import org.jivesoftware.smack.packet.IQ;
 import org.jivesoftware.smack.packet.Presence;
 
 import android.app.Activity;
@@ -30,6 +29,7 @@ import com.facebook.Session;
 import com.zedmedia.gravity.auth.LoginActivity;
 import com.zedmedia.gravity.buddy.BuddyDialog;
 import com.zedmedia.gravity.buddy.BuddyListAdapter;
+import com.zedmedia.gravity.credit.CreditActivity;
 import com.zedmedia.gravity.group.GroupDialog;
 import com.zedmedia.gravity.group.GroupPriceDialog;
 import com.zedmedia.gravity.xmpp.GravityRosterEntry;
@@ -207,15 +207,7 @@ public class Gravity extends Activity implements RosterListener {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.quit:
-			// finish();
-			final IQ iq = new IQ() {
-				@Override
-				public String getChildElementXML() {
-					return "<gravity xmlns='custom:iq:gravity'/>";
-				}
-			};
-			iq.setType(IQ.Type.GET);
-			serverConnection.getConnection().sendPacket(iq);
+			finish();
 			return true;
 		case R.id.logout:
 			ServerConnection.getInstance().logout();
@@ -223,6 +215,10 @@ public class Gravity extends Activity implements RosterListener {
 			return true;
 		case R.id.add_user:
 			buddyDialog.show();
+			return true;
+		case R.id.credit:
+			Intent intent = new Intent(this, CreditActivity.class);
+			this.startActivity(intent);
 			return true;
 		case R.id.add_group:
 			groupDialog.show();

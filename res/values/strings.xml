@@ -27,5 +27,8 @@
     <string name="edit_fees">Edit fees</string>
     <string name="first_name">First Name</string>
     <string name="last_name">Last Name</string>
-
+    <string name="title_activity_credit">Credit</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="your_credit">Your credit</string>
+	<string name="credit">Credit</string>
 </resources>

@@ -5,11 +5,11 @@ import org.jivesoftware.smack.packet.Packet;
 
 import android.util.Log;
 
-public class IQListener implements PacketListener {
-	private static final String TAG = "[gravity IQ listener]";
+import com.zedmedia.gravity.credit.CreditActivity;
 
+public class IQListener implements PacketListener {
 	@Override
 	public void processPacket(Packet pkt) {
-		Log.d(TAG, "IQQQQQQQQQQ packet: "+ pkt.toXML());
+		Log.d("IQ: ", pkt.toXML());
 	}
 }
