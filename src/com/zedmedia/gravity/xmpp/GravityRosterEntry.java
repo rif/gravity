@@ -16,59 +16,59 @@ public class GravityRosterEntry {
 		return rosterEntry;
 	}
 
-	public double getFee() {
-		NameFeePair pair = NameFeePair.fromJson(rosterEntry.getName());
+	public double getPrice() {
+		NamePricePair pair = NamePricePair.fromJson(rosterEntry.getName());
 		if (pair == null) {
-			pair = new NameFeePair(rosterEntry.getName(), 0.0);
+			pair = new NamePricePair(rosterEntry.getName(), 0.0);
 			rosterEntry.setName(pair.toJson());
 		}
-		return pair.fee;
+		return pair.price;
 	}
 
-	public void setFee(double fee) {
-		NameFeePair pair = NameFeePair.fromJson(rosterEntry.getName());
+	public void setPrice(double price) {
+		NamePricePair pair = NamePricePair.fromJson(rosterEntry.getName());
 		if (pair == null) {
-			pair = new NameFeePair(rosterEntry.getName(), 0.0);
+			pair = new NamePricePair(rosterEntry.getName(), 0.0);
 		}
-		pair.fee = fee;
+		pair.price = price;
 		rosterEntry.setName(pair.toJson());
 	}
 
 	public String getName() {
-		NameFeePair pair = NameFeePair.fromJson(rosterEntry.getName());
+		NamePricePair pair = NamePricePair.fromJson(rosterEntry.getName());
 		if (pair == null) {
-			pair = new NameFeePair(rosterEntry.getName(), 0.0);
+			pair = new NamePricePair(rosterEntry.getName(), 0.0);
 			rosterEntry.setName(pair.toJson());
 		}
 		return pair.name;
 	}
 
 	public void setName(String name) {
-		NameFeePair pair = NameFeePair.fromJson(rosterEntry.getName());
+		NamePricePair pair = NamePricePair.fromJson(rosterEntry.getName());
 		if (pair == null) {
-			pair = new NameFeePair(name, 0.0);
+			pair = new NamePricePair(name, 0.0);
 		}
 		pair.name = name;
 		rosterEntry.setName(pair.toJson());
 	}
 
-	private static class NameFeePair {
+	private static class NamePricePair {
 		private String name;
-		private double fee;
+		private double price;
 		private static Gson gson = new Gson();
 
-		NameFeePair(String name, double fee) {
+		NamePricePair(String name, double price) {
 			this.name = name;
-			this.fee = fee;
+			this.price = price;
 		}
 
 		String toJson() {
 			return gson.toJson(this);
 		}
 
-		static NameFeePair fromJson(String json) {
+		static NamePricePair fromJson(String json) {
 			try {
-				return gson.fromJson(json, NameFeePair.class);
+				return gson.fromJson(json, NamePricePair.class);
 			} catch (JsonSyntaxException jse) {
 				return null;
 			}

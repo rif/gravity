@@ -31,4 +31,5 @@
     <string name="hello_world">Hello world!</string>
     <string name="your_credit">Your credit</string>
 	<string name="credit">Credit</string>
+	<string name="buy10">Buy 10 credits</string>
 </resources>

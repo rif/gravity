@@ -53,7 +53,7 @@ public class BuddyListAdapter extends ArrayAdapter<GravityRosterEntry> {
 				statusText.setText("");
 				statusText.setTag(p.toString());
 				statusText.setText(statusText.getText().toString() + " "
-						+ entry.getFee());
+						+ entry.getPrice());
 				String name = entry.getName();
 				if (name == null || name.trim().equals("")) {
 					name = entry.getRosterEntry().getUser();

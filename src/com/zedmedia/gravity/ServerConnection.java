@@ -32,6 +32,7 @@ import com.facebook.Settings;
 import com.facebook.model.GraphUser;
 import com.zedmedia.gravity.xmpp.GravityExpectedPriceExtension;
 import com.zedmedia.gravity.xmpp.GravityMessageListener;
+import com.zedmedia.gravity.xmpp.GravityNewPriceExtension;
 import com.zedmedia.gravity.xmpp.IQListener;
 
 public class ServerConnection {
@@ -107,7 +108,10 @@ public class ServerConnection {
 			final ProviderManager pm = ProviderManager.getInstance();
 			pm.addExtensionProvider(GravityExpectedPriceExtension.ELEMENT_NAME,
 					GravityExpectedPriceExtension.NAMESPACE,
-					new GravityExpectedPriceExtension.Provider());			
+					new GravityExpectedPriceExtension.Provider());
+			pm.addExtensionProvider(GravityNewPriceExtension.ELEMENT_NAME,
+					GravityExpectedPriceExtension.NAMESPACE,
+					new GravityNewPriceExtension.Provider());
 			// Packet listener to get messages sent to logged in user
 			connection.addPacketListener(new IQListener(),
 					new PacketTypeFilter(IQ.class));

@@ -20,6 +20,7 @@ import android.widget.LinearLayout;
 import com.zedmedia.gravity.Gravity;
 import com.zedmedia.gravity.R;
 import com.zedmedia.gravity.ServerConnection;
+import com.zedmedia.gravity.xmpp.GravityNewPriceExtension;
 import com.zedmedia.gravity.xmpp.GravityRosterEntry;
 import com.zedmedia.gravity.xmpp.GravityRosterGroup;
 
@@ -91,7 +92,7 @@ public class BuddyDialog extends Dialog {
 							GravityRosterGroup newGi = new GravityRosterGroup(newGroup);
 							Message msg = new Message(editedEntry.getRosterEntry().getUser(),
 									Message.Type.chat);
-							msg.setProperty("new_price", newGi.getPrice());
+							msg.addExtension(new GravityNewPriceExtension(newGi.getPrice()));
 							ServerConnection.getInstance().getConnection().sendPacket(msg);
 						} catch (XMPPException e) {
 							Log.e(TAG, e.getMessage());

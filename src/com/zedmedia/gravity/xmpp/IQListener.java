@@ -5,8 +5,6 @@ import org.jivesoftware.smack.packet.Packet;
 
 import android.util.Log;
 
-import com.zedmedia.gravity.credit.CreditActivity;
-
 public class IQListener implements PacketListener {
 	@Override
 	public void processPacket(Packet pkt) {

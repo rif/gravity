@@ -99,9 +99,9 @@ public class ChatActivity extends Activity {
 		GravityRosterEntry re = new GravityRosterEntry(recipient);
 		
 		Message msg = new Message(recipient.getUser(), Message.Type.chat);
-		Log.d(TAG, "expecting: " + re.getFee());
+		Log.d(TAG, "expecting: " + re.getPrice());
 		msg.setBody(message);		
-		msg.addExtension(new GravityExpectedPriceExtension(re.getFee()));
+		msg.addExtension(new GravityExpectedPriceExtension(re.getPrice()));
 		serverConnection.getConnection().sendPacket(msg);
 		messages.add(serverConnection.getConnection().getAccountManager()
 				.getAccountAttribute("name")

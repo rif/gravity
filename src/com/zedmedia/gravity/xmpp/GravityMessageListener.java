@@ -9,12 +9,12 @@ import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smack.packet.Packet;
 import org.jivesoftware.smack.util.StringUtils;
 
+import android.content.Intent;
+import android.util.Log;
+
 import com.zedmedia.gravity.ChatActivity;
 import com.zedmedia.gravity.Gravity;
 import com.zedmedia.gravity.ServerConnection;
-
-import android.content.Intent;
-import android.util.Log;
 
 public class GravityMessageListener implements PacketListener {
 
@@ -22,16 +22,19 @@ public class GravityMessageListener implements PacketListener {
 	public void processPacket(Packet packet) {
 		Map<RosterEntry, ChatActivity> activeChats = Gravity.getActiveChats();
 		Message message = (Message) packet;
-		Object newPrice = message.getProperty("new_price");
+		Object newPrice = message.getExtension(
+				GravityNewPriceExtension.ELEMENT_NAME,
+				GravityNewPriceExtension.NAMESPACE);
 		if (newPrice != null) {
 			// this is a new price message
 			Roster roster = ServerConnection.getInstance().getConnection()
 					.getRoster();
-			RosterEntry entry = roster.getEntry(StringUtils.parseBareAddress(message.getFrom()));
+			RosterEntry entry = roster.getEntry(StringUtils
+					.parseBareAddress(message.getFrom()));
 			Log.d("New price: ", message.getFrom() + ":" + entry);
 			if (entry != null) {
 				GravityRosterEntry re = new GravityRosterEntry(entry);
-				re.setFee((Double) newPrice);
+				re.setPrice((Double) newPrice);
 			}
 			return;
 		}
